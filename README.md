@@ -39,6 +39,9 @@ For the first three months of the experiment, all corals were monitored every ~8
 
 ![ Alt text](./images/fig_s1_setup.jpeg)
 
+**Experimental treatments:** Panel (a) shows a control *Pocillopora* coral fragment with no structure nearby. Panel (b) is a coral fragment in a skeleton treatment. Panel (c) is a coral fragment in a skeleton with *Lobophora* treatment. *Lobophora* was attached both to the base of the tube and to a nearby branch to simulate natural overgrowth patterns. Panel (d) is a coral fragment in the skeleton with *Halimeda* treatment. Panel (f) shows an example of a fresh snail wound created at the beginning of the experiment. All treatments (a-d) were fully crossed with snail wounding (n = 15/treatment)
+
+
 ### Recommended Citation
 
 Official citation forthcoming
