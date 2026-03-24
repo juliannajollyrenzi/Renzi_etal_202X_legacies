@@ -28,14 +28,14 @@ Permanent email: julianna.renzi@gmail.com
 
 This dataset contains the data and code required to replicate analyses in Renzi et al. (in prep). This dataset was collected as part of a 9-month long experiment in Moorea, French Polynesia examining the effects of dead coral skeletons, associated macroalgae (i.e., *Halimeda* and *Lobophora* spp.), and wounding by the corallivorous snail *Drupella* on *Pocillopora* coral fragments. We ran the experiment on a shallow (~2 m) sandflat on the North shore lagoon between July 2023 and May 2024. For the experiment, we exposed 120 *Pocillopora* coral fragments (~8 cm height) to one of two wounding treatments (an initial wound by *Drupella* or not) crossed with four structure treatments:
 
-| Treatment        | Description           | Number of coral colonies  |
+| Skeleton treatment        | Description           | Number of coral colonies  |
 | ------------- |:-------------:| -----:|
-| Control      | No skeleton or macroalgae | 15 +snail, 15 -snail (30 total) |
-| Skeleton      | Proximity (~1cm) to a coral skeleton with turf algae      |   15 +snail, 15 -snail (30 total) |
-| *Halimeda* skeleton | Proximity (~1cm) to a coral skeleton with turf algae **and** contact with *Halimeda* spp.      |    15 +snail, 15 -snail (30 total) |
-| *Lobophora* skeleton | Proximity (~1cm) to a coral skeleton with turf algae **and** contact with *Lobophora* spp.      |    15 +snail, 15 -snail (30 total) |
+| Control      | No skeleton or macroalgae | 15 +snail, 15 -snail (n=30) |
+| Skeleton      | Proximity (~1cm) to a coral skeleton with turf algae      |   15 +snail, 15 -snail (n=30) |
+| *Halimeda* skeleton | Proximity (~1cm) to a coral skeleton with turf algae **and** contact with *Halimeda* spp.      |    15 +snail, 15 -snail (n=30) |
+| *Lobophora* skeleton | Proximity (~1cm) to a coral skeleton with turf algae **and** contact with *Lobophora* spp.      |    15 +snail, 15 -snail (n=30) |
 
-For the first three months of the experiment, all corals were monitored regularly (every ~8 days) for tissue loss, macroalgae were replaced regularly, and we tracked the change in coral wet weight. After 3 months we removed macroalgal treatments and monitored survivorship through the warm season for corals in proximity to a coral skeleton vs. controls. In late April, early May we quantified tissue loss after 6 months of skeleton (no macroalgae) exposure and ended the experiment. *Drupella* wounds were created by gently cable tying snails to coral fragments for two days, following established methods (Clements and Hay 2018, Rice et al. 2021), and snail wound size was measured using ImageJ software (Abramoff et al. 2004; Schneider et al. 2012).
+For the first three months of the experiment, all corals were monitored every ~8 days for tissue loss, macroalgae were replaced regularly, and we tracked the change in coral wet weight. After 3 months we removed macroalgal treatments and monitored survivorship through the warm season for corals in proximity to a coral skeleton (formerly Skeleton, *Halimeda* skeleton, and *Lobophora* skeleton treatments) vs. controls. In late April/early May we quantified tissue loss after 6 months of skeleton exposure and ended the experiment. *Drupella* wounds were created by gently cable tying snails to coral fragments for two days, following established methods (Clements and Hay 2018, Rice et al. 2021), and snail wound size was measured using ImageJ software (Abramoff et al. 2004; Schneider et al. 2012).
 
 ### Recommended Citation
 
