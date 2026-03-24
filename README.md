@@ -37,6 +37,8 @@ This dataset contains the data and code required to replicate analyses in Renzi 
 
 For the first three months of the experiment, all corals were monitored every ~8 days for tissue loss, macroalgae were replaced regularly, and we tracked the change in coral wet weight. After 3 months we removed macroalgal treatments and monitored survivorship through the warm season for corals in proximity to a coral skeleton (formerly Skeleton, *Halimeda* skeleton, and *Lobophora* skeleton treatments) vs. controls. In late April/early May we quantified tissue loss after 6 months of skeleton exposure and ended the experiment. *Drupella* wounds were created by gently cable tying snails to coral fragments for two days, following established methods (Clements and Hay 2018, Rice et al. 2021), and snail wound size was measured using ImageJ software (Abramoff et al. 2004; Schneider et al. 2012).
 
+![ Alt text](./images/fig_s1_setup.jpeg)
+
 ### Recommended Citation
 
 Official citation forthcoming
