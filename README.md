@@ -68,7 +68,9 @@ Schneider CA, Rasband WS, Eliceiri KW (2012) NIH Image to ImageJ: 25 years of im
 
 # Data files
 
-## File: XX.csv
+- Note that due to storage limitations on GitHub, the timeseries data from the Moorea Coral Reef LTER are not included here, but they can be downloaded freely here: https://mcr.lternet.edu/data
+
+## File: metadata.csv
 
 *Name*
 
@@ -77,4 +79,80 @@ Schneider CA, Rasband WS, Eliceiri KW (2012) NIH Image to ImageJ: 25 years of im
 #### Variables
 
 * coral_id: XXX
+
+## File: coral_wet_weights_3mo.csv
+
+*Name*
+
+**Description:** XXX 
+
+#### Variables
+
+* coral_id: XXX
+
+## File: tissue_cover.csv
+
+*Name*
+
+**Description:** XXX 
+
+#### Variables
+
+* coral_id: XXX
+
+## File: wound_healing.csv
+
+*Name*
+
+**Description:** XXX 
+
+#### Variables
+
+* coral_id: XXX
+
+## File: wound_sizes.csv
+
+*Name*
+
+**Description:** XXX 
+
+#### Variables
+
+* coral_id: XXX
+
+## File: snail_lengths.csv
+
+*Name*
+
+**Description:** XXX 
+
+#### Variables
+
+* coral_id: XXX
+
+# R files
+
+## File: analysis_initial_differences.Rmd
+
+**Description:** XXX 
+
+## File: timeseries_mcr.Rmd
+
+**Description:** XXX 
+
+## File: analysis_weight.Rmd
+
+**Description:** XXX 
+
+## File: analysis_tissue_cover_3mo.Rmd
+
+**Description:** XXX 
+
+## File: analysis_tissue_cover_9mo.Rmd
+
+**Description:** XXX 
+
+## File: analysis_wound_healing.Rmd
+
+**Description:** XXX 
 
