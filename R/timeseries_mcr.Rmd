@@ -1,0 +1,262 @@
+---
+title: "LTER forereef timeseries"
+author: "Julianna Renzi"
+date: "2026-03-26"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r clear environment}
+# clear environment for reproducibility
+rm(list=ls())
+```
+
+```{r load packages}
+# load librarian (package for installing/loading packages)
+if (!require("librarian")) install.packages("librarian")
+
+# load required packages
+librarian::shelf(here, # relative file paths 
+                 tidyverse, # data wrangling
+                 glmmTMB # model creation
+                 )
+```
+
+```{r}
+# explicitly assign tidyverse functions to avoid confusion
+summarize <- dplyr::summarize
+group_by <- dplyr::group_by
+select <- dplyr::select
+```
+
+# Read in data
+
+All downloaded on Jan 18, 2026 from the MCR website
+
+```{r}
+# coral timeseries
+corals_1 <- read_csv(here("data", "mcr",
+                          "knb-lter-mcr.4_2_20260116_coral_wide.csv"),
+                     # specify that NA values are coded as "na"
+                      na = "na")
+  
+# algal timeseries
+algae_1 <- read_csv(here("data", "mcr",
+                         "MCR_LTER_Annual_Survey_Benthic_Cover_20251009.csv"))
+```
+
+# Wrangling
+
+## Corals
+
+Get metadata in tidy format
+
+```{r}
+corals_1 %>% 
+  rowwise() %>%
+  mutate(Site = paste0(str_split(string = Location, pattern =  " ")[[1]][1], " ", 
+                       str_split(string = Location, pattern =  " ")[[1]][2]),
+         Habitat = paste0(str_split(string = Location, pattern =  " ")[[1]][3], "_", 
+                          str_split(string = Location, pattern =  " ")[[1]][4]),
+         # do this separate for fringe and outer because the syntax is different
+         PoleQuad = case_when(
+           Habitat == "Fringing_Reef" ~ 
+             paste0("P", str_split(string = Location, pattern =  " ")[[1]][8], 
+                    "_Q", str_split(string = Location, pattern =  " ")[[1]][10]),
+           TRUE ~ paste0("P", str_split(string = Location, pattern =  " ")[[1]][9], 
+                         "_Q", str_split(string = Location, pattern =  " ")[[1]][11]))
+         ) %>% 
+  # just take forereef 10m
+  filter(Habitat == "Outer_10") -> corals_2
+```
+
+Sum coral and macroalgae columns
+
+```{r}
+corals_2 %>% 
+  mutate(Coral = sum(Acanthastrea, Acropora, Astrea, Astreopora, Cyphastrea, Fungiidae_unidentified, 
+                     Gardinoseris, Goniastrea, Herpolitha, Leptastrea, Leptoseris, Lobophyllia, 
+                     Montipora, Pachyseris, Pavona, Plesiastrea, Pocillopora, Porites, 
+                     Porites_irregularis, Porites_rus, Porites_spp_Massive, Psammocora, Sandolitha, 
+                     Stylocoeniella, Tubastrea, 
+                     na.rm = TRUE)) %>% # FYI Tubastrea is a hard coral but non-reef building
+  # also note that there appear to be no observations of Gardinoseris or Goniastrea
+  rename(Year = Date) %>% 
+  # fill in NA's with zeros
+  mutate(across(where(is.numeric), ~replace_na(., 0))) -> corals_3 
+```
+
+Get year averages and pivot longer for plotting
+
+```{r}
+corals_3 %>% 
+  # filter to just N shore where MHW strongest
+  filter(Site == "LTER 1" | Site == "LTER 2") %>% 
+  group_by(Year) %>% 
+  summarize(Macroalgae_cover = mean(Macroalgae), 
+            Coral_cover = mean(Coral), 
+            Pocillopora_cover = mean(Pocillopora),
+            Macroalgae_se = sd(Macroalgae)/sqrt(n()),
+            Coral_se = sd(Coral)/sqrt(n()),
+            Pocillopora_se = sd(Pocillopora)/sqrt(n())) %>% 
+  pivot_longer(c(-Year),
+               names_to = c("Substrate", ".value"),
+               names_sep = "_") -> corals_4_yr
+```
+
+## Algae
+
+First, make sure all quadrats add up to 100% 
+
+```{r}
+algae_1 %>% 
+  # get rid of no data quadrats
+  filter(Taxonomy_Substrate_Functional_Group != "No data") %>% 
+  # get just the forereef data we care about
+  filter(Habitat == "Forereef" & Depth == "10") %>% 
+  group_by(Year, Date, Location, Site, Habitat, Depth, Transect, Quadrat) %>% 
+  summarize(total_cover = sum(Percent_Cover)) -> algae_quad_check
+```
+
+See that this generally looks good, but will need to exclude **LTER 5 Outer 10 m Algae Transect 2 Quad 10 in 2017** later (over 100%). Check coverage across years/sites as well:
+
+```{r}
+algae_quad_check %>% 
+  group_by(Year, Site) %>% 
+  summarize(N_quads = n()) # looks good
+
+algae_quad_check %>% 
+  group_by(Year) %>% 
+  summarize(N_quads = n()) # looks good starting after 2006 (will be fine for our purposes)
+```
+
+Now pivot wider to fill in zeros
+
+```{r}
+algae_1 %>% 
+  # get rid of no data quadrats
+  filter(Taxonomy_Substrate_Functional_Group != "No data") %>% 
+  # get just the forereef data we care about
+  filter(Habitat == "Forereef" & Depth == "10") %>% 
+  # get rid of weird years
+  filter(Year != 2005 & Year != 2006) %>% 
+  pivot_wider(names_from = Taxonomy_Substrate_Functional_Group,
+              values_from = Percent_Cover,
+              # fill in NA's from pivoting with zeros
+              values_fill = 0) %>% 
+  rowwise() %>% 
+  
+  # calculate Halimeda and Lobophora cover
+  mutate(Lobophora = `Lobophora variegata`,
+         Halimeda = `Halimeda sp.` + `Halimeda minima` + `Halimeda opuntia` + `Halimeda discoidea` + `Halimeda distorta` + `Halimeda incrassata` + `Halimeda macroloba` + `Halimeda taenicola`) %>% 
+  
+  rowwise() %>% 
+  # calculate total macroalgal cover
+  mutate(Macroalgae = sum(`Asparagopsis taxiformis`, `Halimeda sp.`, `Lobophora variegata`,  `Peyssonnelia inamoena`, `Turbinaria ornata`, `Caulerpa serrulata`, `Dictyota sp.`, `Ralfsia sp.`, `Dictyota friabilis`, `Halimeda discoidea`, `Halimeda minima`, `Cladophoropsis membranacea`, `Martensia elegans`, `Amphiroa fragilissima`, `Halimeda distorta`, `Symploca hydnoides`, `Amansia rhodantha`, `Halimeda incrassata`, `Jania sp.`, `Halimeda macroloba`, `Dictyota bartayresiana`, `Halimeda opuntia`, `Halimeda taenicola`, `Microdictyon okamurae`, `Codium geppiorum`, `Peyssonnelia sp.`, `Caulerpa pickeringii`, `Rhipidosiphon javensis`, `Peyssonnelia bornetii`, `Boodlea kaeneana`, `Caulerpa peltata`)) %>% 
+  ungroup() %>% 
+  # get just the columns we want
+  select(Year, Date, Location, Site, Habitat, Depth, Transect, Quadrat, Lobophora, Halimeda, Macroalgae) -> algae_2
+  
+```
+
+Filter out weird quadrat with over 100% and get metadata to match coral data
+
+```{r}
+algae_2 %>% 
+# note from above (in the algae_quad_key code) that we have one quadrat that is over 100 (140)--LTER 5 Outer 10 m Algae Transect 2 Quad 10 in 2017--want to exclude that for our averages
+  mutate(Location_year = paste0(Location, "_", Year)) %>% 
+  # get rid of that one quadrat
+  filter(Location_year != "LTER 5 Outer 10 m Algae Transect 2 Quad 10_2017") %>% 
+  rowwise() %>% 
+  # and get site metadata to match corals
+  mutate(Site = paste0(str_split(string = Location, pattern =  " ")[[1]][1], " ",str_split(string = Location, pattern =  " ")[[1]][2])) -> algae_3
+```
+
+Get averages for each year on the northern shore
+
+```{r}
+algae_3 %>% 
+  # filter to just N shore where MHW strongest
+  filter(Site == "LTER 1" | Site == "LTER 2") %>% 
+  group_by(Year) %>% 
+  summarize(Macroalgae_cover = mean(Macroalgae), # Bob's version of macroalgal cover
+            Halimeda_cover = mean(Halimeda), 
+            Lobophora_cover = mean(Lobophora),
+            Macroalgae_se = sd(Macroalgae)/sqrt(n()),
+            Halimeda_se = sd(Halimeda)/sqrt(n()),
+            Lobophora_se = sd(Lobophora)/sqrt(n())) %>% 
+  pivot_longer(c(-Year),
+               names_to = c("Substrate", ".value"),
+               names_sep = "_") -> algae_4_yr
+```
+
+# Join coral and algae together
+
+```{r}
+# need to drop macroalgae from coral dataset
+corals_4_yr %>% 
+  filter(Substrate != "Macroalgae") %>% 
+  full_join(algae_4_yr) -> coral_and_algae_2
+```
+
+Set a couple formatting things:
+
+```{r}
+italic_labels <- c("All coral" = "All coral", "Halimeda" = expression(italic("Halimeda")), "Lobophora" = expression(italic("Lobophora")), "Pocillopora" = expression(italic("Pocillopora")),"All macroalgae" = "All macroalgae")
+
+color_labels <- c("All coral" = "#440154", Halimeda = "#8cc751", "Lobophora" = "#808000", "Pocillopora" = "#C09ADB", "All macroalgae" = "#063b00")
+```
+
+```{r}
+pdf(here("figures", "fig_1a_mcr.pdf"), height = 3, width = 5.5)
+
+coral_and_algae_2 %>% 
+  filter(Year > 2013) %>% 
+  # make character to get rid of decimal places (not sure why it's so weird here)
+  mutate(Year = as.character(Year)) %>% 
+  # make this a little more clear for plotting
+  mutate(Substrate = case_when(Substrate == "Coral" ~ "All coral",
+                               Substrate == "Macroalgae" ~ "All macroalgae",
+                               TRUE ~ Substrate)) %>% 
+  # order factors so they make sense
+  mutate(Substrate = factor(Substrate, levels=c("All coral", "Pocillopora", "All macroalgae", "Lobophora", "Halimeda"))) %>% 
+  # plot
+  ggplot(aes(x = Year, y = cover, group = Substrate, linetype = Substrate, alpha = Substrate)) +
+  geom_line(aes(color = Substrate)) +
+    geom_ribbon(
+      aes(ymin = cover - 2 * se,
+          ymax = cover + 2 * se,
+          fill = Substrate),
+      alpha = 0.3
+    ) +
+    scale_fill_manual(values = color_labels,
+                      labels = italic_labels) +
+    scale_color_manual(values = color_labels,
+                       labels = italic_labels)  +
+  # set different linetypes for "all" categories and specific categories
+  scale_linetype_manual(values = c("All coral" = "solid", "All macroalgae" = "solid", "Halimeda" = "dotted", "Lobophora" = "dotted", "Pocillopora" = "dotted"),
+                        labels = italic_labels
+                        ) +
+  # make specific categories more transparent and coral/macroalgae bold
+  scale_alpha_manual(values = c("All coral" = 1.0, "All macroalgae" = 1.0, "Halimeda" = 0.5, "Lobophora" = 0.5, "Pocillopora" = 0.5),
+                     labels = italic_labels) +
+    xlab("") +
+    ylab("Cover (%)") +
+  # 2019 MHW
+  geom_vline(xintercept = "2019", color = "firebrick", alpha = 0.5,
+             lwd = 1.5) +
+  theme_classic() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        panel.border = element_rect(color = "black", fill = NA, linewidth = 1))
+
+dev.off()
+```
+
+
+
+

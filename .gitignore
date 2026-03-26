@@ -48,3 +48,10 @@ po/*~
 
 # RStudio Connect folder
 rsconnect/
+
+# MCR files
+knb-lter-mcr.4_2_20260116_coral_wide.csv
+MCR_LTER_Annual_Survey_Benthic_Cover_20251009.csv
+
+# PDF images
+*.pdf

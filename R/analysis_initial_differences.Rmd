@@ -1,0 +1,102 @@
+---
+title: 'Analysis: check for any initial differences and get averages'
+author: "Julianna Renzi"
+date: "2026-03-25"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r clear environment}
+# clear environment for reproducibility
+rm(list=ls())
+```
+
+```{r load packages}
+# load librarian (package for installing/loading packages)
+if (!require("librarian")) install.packages("librarian")
+
+# load required packages
+librarian::shelf(here, # relative file paths 
+                 tidyverse, # data wrangling
+                 car # type II ANOVA
+                 )
+```
+
+# Read in the data
+
+```{r}
+# snail shell length data
+snails_1 <- read_csv(here("data", "snail_lengths.csv"))
+
+# wound size data
+wound_size_1 <- read_csv(here("data", "wound_sizes.csv"))
+
+# metadata
+metadata <- read_csv(here("data", "metadata.csv"))
+```
+
+# Snail sizes
+
+Get averages
+
+```{r}
+snails_1 %>% 
+  inner_join(metadata) -> snails_2
+```
+
+```{r}
+snails_2 %>% 
+  summarize(mean_length = mean(snail_length_mm),
+            se_length = sd(snail_length_mm)/sqrt(n()))
+```
+
+
+Check for any initial differences
+
+```{r}
+mlength <- glmmTMB(snail_length_mm ~ treatment_skeleton, data = snails_2)
+  car::Anova(mlength)
+```
+
+
+# Initial wound size
+
+```{r}
+wound_size_1 %>% 
+  inner_join(metadata) -> wound_size_2
+```
+
+Get mean initial wound size
+
+```{r}
+wound_size_2 %>% 
+  summarize(mean_size = mean(size_mm2),
+            se_size = sd(size_mm2)/sqrt(n()))
+```
+
+Check for differences
+
+```{r}
+msize <- glmmTMB(size_mm2 ~ treatment_skeleton, data = wound_size_2)
+  car::Anova(msize) # looks good
+```
+
+# Final sample sizes 
+
+After excluding predated coral, we note that there is still at least n = 12 per treatment
+
+```{r}
+metadata %>% 
+  filter(is.na(exclude_reason)) %>% 
+  group_by(treatment_full) %>% 
+  summarize(n = n()) 
+```
+
+
+
+

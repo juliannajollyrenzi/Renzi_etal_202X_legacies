@@ -1,0 +1,204 @@
+---
+title: 'Analysis: Change in weight over 3 months'
+author: "Julianna Renzi"
+date: "2026-03-25"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r clear environment}
+# clear environment for reproducibility
+rm(list=ls())
+```
+
+```{r load packages}
+# load librarian (package for installing/loading packages)
+if (!require("librarian")) install.packages("librarian")
+
+# load required packages
+librarian::shelf(here, # relative file paths 
+                 tidyverse, # data wrangling
+                 glmmTMB, # model creation
+                 car, # type II ANOVA
+                 emmeans, # posthoc contrasts
+                 performance, # model assumptions
+                 multcomp, # cld
+                 ggtext # for complicated axes labels
+                 )
+```
+
+```{r set color palette}
+"#E1BE6A" -> no.snail.col
+"#40B0A6" -> snail.col
+
+"#c49627" -> no.snail.col.dark
+"#2d7d76" -> snail.col.dark
+```
+
+# Read in data
+
+```{r}
+# coral wet weight data over the macroalgal addition time period
+weights_1 <- read_csv(here("data", "coral_wet_weights_3mo.csv"))
+
+# metadata for corals 
+metadata <- read_csv(here("data", "metadata.csv"))
+```
+
+# Calculate weight change
+
+```{r}
+weights_1 %>% 
+  pivot_wider(id_cols = coral_id,
+              names_from = time_point,
+              values_from = wet_weight_g) %>% 
+  # calculate percent change
+  mutate(percent_change = ((`1`-`0`)/`0`) * 100) %>% 
+  # join with metadata
+  full_join(metadata) %>% 
+  # make structure labels nice for plotting
+  mutate(treatment_skeleton = case_when(treatment_skeleton == "control" ~ "Control",
+                                        treatment_skeleton == "hali" ~ "Halimeda skeleton",
+                                        treatment_skeleton == "loboph" ~ "Lobophora skeleton",
+                                        treatment_skeleton == "skeleton" ~ "Skeleton")) %>% 
+  # get into a nice order
+  mutate(treatment_skeleton = factor(treatment_skeleton, levels = c("Control", "Skeleton", "Halimeda skeleton", "Lobophora skeleton"))) -> weights_2
+```
+
+# Model weight change
+
+## With an interaction
+
+```{r}
+mW1 <- glmmTMB(percent_change ~ treatment_skeleton + treatment_drupella + 
+                 treatment_skeleton:treatment_drupella + `0` + (1|parent_colony),  
+              data = weights_2)
+```
+
+Examine outputs and check whether interaction was important
+
+```{r}
+summary(mW1)
+car::Anova(mW1) # interaction is not important 
+```
+
+## Without the interaction
+
+Drop the interaction because it does not appear important 
+
+```{r}
+mW2 <- glmmTMB(percent_change ~ treatment_skeleton + treatment_drupella + `0` + (1|parent_colony), 
+              data = weights_2)
+```
+
+Examine outputs and check whether interaction was important
+
+```{r}
+summary(mW2)
+car::Anova(mW2) # interaction is not important 
+```
+
+Check model 
+
+```{r}
+check_model(mW2) # looks good
+```
+
+Examine posthoc contrasts
+
+```{r}
+# plot marginal means for skeleton treatment to see expected ordering
+plot(emmeans(mW2, ~ treatment_skeleton ))
+
+# examine posthoc contrasts (pairwise is a shortcut for pairs())
+emmeans(mW2, pairwise ~ treatment_skeleton, 
+        type = "response") # this is overkill (no link function and Gaussian)
+
+emmeans(mW2, pairwise ~ treatment_drupella, 
+        type = "response") # this is overkill (no link function and Gaussian)
+```
+
+# Plot model and data
+
+Get model dataframe. First, get compact letter displays from the package `cld` and pairwise `emmeeans` comparisons
+
+```{r}
+grps <- as_tibble(cld(emmeans(mW2, pairwise ~ treatment_skeleton | treatment_drupella, 
+                              type = "response"), 
+                      Letters = letters)) %>% 
+  # make a nicer grouping variable without spaces
+  mutate(.group = str_remove_all(.group, " ")) %>% 
+  rename(group = .group) %>% 
+  # add spaces for plotting aesthetics
+  mutate(group = case_when(group == "a" ~ "  a",
+                           group == "c" ~ "  c",
+                           TRUE ~ group))
+```
+
+Then join with the estimated marginal means and errors from the main `emmeans` call
+
+```{r}
+as_tibble(emmeans(mW2, pairwise ~ treatment_skeleton | treatment_drupella, 
+                  # response is overkill here as well 
+                  type = "response")$emmeans) %>% 
+  full_join(grps) -> grps_2
+```
+
+Plot together with raw data and save as a PDF in our `figures` folder
+
+```{r}
+pdf(here("figures", "fig_2_weights.pdf"), height = 3, width = 5.25)
+
+grps_2 %>% 
+  ggplot() +
+  geom_pointrange(aes(x = treatment_skeleton, y = emmean, 
+                      color = treatment_drupella,
+                      ymin = lower.CL, ymax = upper.CL),
+                      size = .8, linewidth = .8,
+                  position = position_dodge(width = 0.5)) +
+  scale_color_manual(name = "Snail wound", labels = c("n" = "No", "y" = "Yes"),
+                     values = c(no.snail.col, snail.col)) +
+  # make a new color scale
+  ggnewscale::new_scale_color() +
+  # add raw data
+  geom_jitter(data = weights_2,
+              aes(x = treatment_skeleton, 
+                  y = percent_change, 
+                  # need to use fill here with shape 21 to force the offset 
+                  fill = treatment_drupella,
+                  stroke = .5, # controls size of outline
+                  fill = NA, # don't actually want the fill so we can see the points well (just for grouping)
+                  color = treatment_drupella),
+              size = 2, shape = 21,
+              position = position_jitterdodge(
+                jitter.width = 0.15,
+                jitter.height = 0,
+                dodge.width = 0.5 # matching the position_dodge() above
+              )
+  ) +
+  scale_color_manual(name = "Snail wound", labels = c("n" = "No", "y" = "Yes"),
+                     values = c(no.snail.col.dark, snail.col.dark)) +
+  theme_classic() +
+  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+        legend.position = "top", axis.text.x = element_markdown(lineheight = 1)) +
+  ylab("Weight change (%)") +
+  xlab("") +
+  scale_x_discrete(
+    labels = (c("Control" = "Control", "Skeleton" = "Skeleton",
+                "Halimeda skeleton" = "<i>Halimeda</i><br>skeleton",
+                "Lobophora skeleton" = "<i>Lobophora</i><br>skeleton"))) +
+  ggnewscale::new_scale_color() +
+  geom_text(data = subset(grps_2, treatment_drupella == "n"),
+            aes(label = group, x = treatment_skeleton, y = emmean), 
+              vjust = -1.5, hjust = 3, size = 4, color = "black") 
+
+dev.off()
+```
+
+
+

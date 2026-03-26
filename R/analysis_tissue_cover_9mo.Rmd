@@ -1,0 +1,339 @@
+---
+title: 'Analysis: Spring tissue change'
+author: "Julianna Renzi"
+date: "2026-03-26"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r clear environment}
+# clear environment for reproducibility
+rm(list=ls())
+```
+
+```{r load packages}
+# load librarian (package for installing/loading packages)
+if (!require("librarian")) install.packages("librarian")
+
+# load required packages
+librarian::shelf(here, # relative file paths 
+                 tidyverse, # data wrangling
+                 glmmTMB, # model creation
+                 car, # type II ANOVA
+                 emmeans, # marginal means
+                 performance, # check model assumptions
+                 multcomp, # compact letter displays
+                 patchwork, # combining plots into one
+                 scales # percent formatting
+                 )
+```
+
+```{r set color palette}
+"#E1BE6A" -> no.snail.col
+"#40B0A6" -> snail.col
+
+"#c49627" -> no.snail.col.dark
+"#2d7d76" -> snail.col.dark
+```
+
+# Bring in data
+
+```{r}
+# tissue cover data
+tissue_1 <- read_csv(here("data", "tissue_cover.csv"))
+
+# metadata
+metadata <- read_csv(here("data", "metadata.csv"))
+```
+
+# Prepare data
+
+```{r}
+tissue_1 %>% 
+  # add metadata
+  full_join(metadata) %>% 
+  # filter out corals we need to exclude
+  filter(is.na(exclude_date)) %>% 
+  # don't consider corals that already lost 100% before this window
+  filter(tissue_cover_postmicrobe != 0) %>% 
+  # make proper skeleton treatments
+  mutate(skeleton_yn = case_when(treatment_skeleton == "control" ~ "No",
+                                 treatment_skeleton == "hali" ~ "Yes",
+                                 treatment_skeleton == "loboph" ~ "Yes",
+                                 treatment_skeleton == "skeleton" ~ "Yes")) %>% 
+  # calculate changes
+  mutate(tissue_loss_pp = tissue_cover_postmicrobe - tissue_cover_9mo,
+         tissue_loss_percent = (tissue_cover_postmicrobe - tissue_cover_9mo)/tissue_cover_postmicrobe) %>% 
+  # remove missing coral
+  filter(!is.na(tissue_cover_9mo)) %>% 
+  # make a column for full mortality
+  mutate(total_mortality_yn = case_when(tissue_cover_9mo == 0 ~ 1,
+                   tissue_cover_9mo > 0 ~ 0,
+                   TRUE ~ -9999)) -> tissue_2
+```
+
+# Model
+
+## Tissue loss (PP change)
+
+First, with the interaction
+
+```{r}
+m1 <- glmmTMB(tissue_loss_pp ~ skeleton_yn + treatment_drupella + skeleton_yn:treatment_drupella + (1|parent_colony), 
+              family = gaussian,
+              data = tissue_2)
+```
+
+```{r}
+car::Anova(m1) # not important--drop it
+```
+
+Then, without the interaction
+
+```{r}
+m2 <- glmmTMB(tissue_loss_pp ~ skeleton_yn + treatment_drupella + (1|parent_colony), 
+              family = gaussian,
+              data = tissue_2)
+```
+
+```{r}
+car::Anova(m2) 
+```
+
+Check magnitude
+
+```{r}
+emmeans(m2, pairwise ~ skeleton_yn)
+```
+
+Check model residuals
+
+```{r}
+check_model(m2) # not perfect, but should be OK
+```
+
+## Full mortality 
+
+Also model the probability of complete mortality (i.e., tissue cover = 0% after 9 months)
+
+```{r}
+m3 <- glmmTMB(total_mortality_yn ~ skeleton_yn + treatment_drupella + skeleton_yn:treatment_drupella + (1|parent_colony), 
+              family = binomial,
+              data = tissue_2)
+```
+
+```{r}
+car::Anova(m3)
+```
+
+Drop the interaction
+
+```{r}
+m4 <- glmmTMB(total_mortality_yn ~ skeleton_yn + treatment_drupella + (1|parent_colony), 
+              family = binomial,
+              data = tissue_2)
+```
+
+```{r}
+car::Anova(m4)
+```
+
+Examine the magnitude
+
+```{r}
+summary(m4) # coefficient for skeleton is 2.418
+
+exp(2.418) # means the odds of “success” (i.e., dying) for a coral in the skeleton treatment is about 11.22 times higher than the odds of dying for a control coral
+```
+
+# Plot
+
+## Panel (a)
+
+Get model dataframe
+
+```{r}
+grps <- as_tibble(cld(emmeans(m2, pairwise ~ skeleton_yn), Letters = letters)) %>% 
+  # get rid of weird space
+  mutate(group = str_remove_all(.group, " "))
+```
+
+```{r}
+as_tibble(emmeans(m2, pairwise ~ skeleton_yn)$emmeans) %>% 
+  full_join(grps) -> grps_2
+```
+
+Plot
+
+```{r}
+grps_2 %>% 
+  ggplot() +
+  geom_pointrange(aes(x = skeleton_yn, y = emmean, ymin = lower.CL, ymax = upper.CL),
+                      size = .6, linewidth = .8) +
+  # make a new color scale
+  ggnewscale::new_scale_color() +
+  geom_jitter(data = tissue_2,
+              aes(x = skeleton_yn, y = tissue_loss_pp, color = treatment_drupella),
+              width = 0.15, size = 2, shape = 1, height = 0) + # use hollow circles
+  scale_color_manual(name = "Snail wound", 
+                     labels = c("n" = "No", "y" = "Yes"),
+                     values = c(no.snail.col.dark, snail.col.dark)) +
+  theme_classic() +
+  theme(panel.border = element_rect(color = "black", 
+                                    fill = NA, linewidth = 1),
+        legend.position = "top") +
+  ylab("Tissue loss (pp change)") +
+  xlab("") +
+  scale_x_discrete(labels = c("none" = "Control", "skeleton" = "Skeleton")) +
+  # make a new color scale
+  ggnewscale::new_scale_color() +
+  geom_text(data = grps_2,
+            aes(label = group, x = skeleton_yn, y = upper.CL), 
+              vjust = -1, size = 5, color = "black") -> pp.may.plt
+```
+
+## Panel (b)
+
+Get sample sizes for top of dead bars
+
+```{r}
+# get sample sizes
+tissue_2 %>% 
+  mutate(mortality_binary = case_when(total_mortality_yn == 0 ~ "Alive", 
+                                      total_mortality_yn == 1 ~ "Dead",
+                                      TRUE ~ "ERROR")) %>% 
+  # summarize
+  group_by(skeleton_yn, mortality_binary) %>% 
+  summarize(n = n()) %>% 
+  pivot_wider(names_from = mortality_binary,
+              values_from = n) %>% 
+  mutate(proportion_corals = paste0(Dead, "/", Alive + Dead)) -> prop_corals
+```
+
+Plot
+
+```{r}
+tissue_2 %>% 
+  mutate(mortality_binary = case_when(total_mortality_yn == 0 ~ "Alive", 
+                                      total_mortality_yn == 1 ~ "Dead",
+                                      TRUE ~ "ERROR")) %>% 
+  ggplot(aes(x = skeleton_yn)) +
+  scale_y_continuous(labels = percent) +
+  geom_bar(stat = "count", position = "fill",
+           aes(group = mortality_binary, fill = mortality_binary)) +
+  ylab("Percent of corals") +
+  xlab("") +
+  scale_x_discrete(labels = c("none" = "Control", "skeleton" = "Skeleton")) +
+  scale_fill_manual(name = "Status in May", values = c("Alive" = "#e69f00", "Dead" = "#0072b2")) +
+  theme_classic() +
+  geom_text(data = prop_corals,
+    aes(x = skeleton_yn, y = Dead/(Dead+Alive), label = proportion_corals),
+    vjust = -0.5, color = "#0072b2"
+  ) +
+  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+        legend.position = "top") -> mort.may.plt
+```
+
+## Plot together
+
+```{r}
+pdf(here("figures", "fig_4_mortality.pdf"), height = 3.5 , width = 7)
+
+pp.may.plt + mort.may.plt + plot_annotation(tag_levels = 'a',
+                                            tag_prefix = '(',
+                                            tag_suffix = ')')
+
+dev.off()
+```
+
+# Confirm qualitatively the same if other approaches used
+
+## Percent change of remaining tissue
+
+First, with the interaction
+
+```{r}
+m5 <- glmmTMB(tissue_loss_percent ~ skeleton_yn + treatment_drupella + skeleton_yn:treatment_drupella + (1|parent_colony), 
+              family = gaussian,
+              data = tissue_2)
+```
+
+```{r}
+car::Anova(m5) # not important--drop it
+```
+
+Without the interaction
+
+```{r}
+m6 <- glmmTMB(tissue_loss_percent ~ skeleton_yn + treatment_drupella + (1|parent_colony), 
+              family = gaussian,
+              data = tissue_2)
+```
+
+```{r}
+car::Anova(m6) # skeleton still important (even stronger this way)
+```
+
+## Absolute tissue cover in may 
+
+First, with the interaction
+
+```{r}
+m7 <- glmmTMB(tissue_cover_9mo ~ skeleton_yn + treatment_drupella + skeleton_yn:treatment_drupella + (1|parent_colony), 
+              family = gaussian,
+              data = tissue_2)
+```
+
+```{r}
+car::Anova(m7) # not important--drop it
+```
+
+Without the interaction
+
+```{r}
+m8 <- glmmTMB(tissue_cover_9mo ~ skeleton_yn + treatment_drupella + (1|parent_colony), 
+              family = gaussian,
+              data = tissue_2)
+```
+
+```{r}
+car::Anova(m8) # skeleton still important (even stronger this way)
+```
+
+## Keep all structure treatments in
+
+```{r}
+m9 <- glmmTMB(tissue_loss_percent ~ treatment_skeleton + treatment_drupella + treatment_skeleton:treatment_drupella + (1|parent_colony), 
+              family = gaussian,
+              data = tissue_2)
+```
+
+```{r}
+car::Anova(m9) # not important--drop it
+```
+
+Without the interaction
+
+```{r}
+m10 <- glmmTMB(tissue_loss_percent ~ treatment_skeleton + treatment_drupella + (1|parent_colony), 
+              family = gaussian,
+              data = tissue_2)
+```
+
+```{r}
+car::Anova(m10) 
+```
+
+Examine trends:
+
+```{r}
+plot(emmeans(m10, pairwise ~ treatment_skeleton))
+```
+
+See pattern is the same and the skeleton treatments all appear to behaving similarly, although some power is lost
+
