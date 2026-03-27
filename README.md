@@ -76,7 +76,7 @@ Schneider CA, Rasband WS, Eliceiri KW (2012) NIH Image to ImageJ: 25 years of im
 
 *Metadata*
 
-**Description:** Metadata on experimental coral  
+**Description:** Metadata on experimental corals  
 
 #### Variables
 
