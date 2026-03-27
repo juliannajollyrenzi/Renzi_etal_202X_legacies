@@ -70,90 +70,112 @@ Schneider CA, Rasband WS, Eliceiri KW (2012) NIH Image to ImageJ: 25 years of im
 # Data files
 
 - Note that due to storage limitations on GitHub, the timeseries data from the Moorea Coral Reef LTER are not included here, but they can be downloaded freely here: https://mcr.lternet.edu/data
+- All dates are reported as YYYY-MM-DD
 
 ## File: metadata.csv
 
-*Name*
+*Metadata*
 
-**Description:** XXX 
+**Description:** Metadata on experimental coral  
 
 #### Variables
 
-* coral_id: XXX
+* coral_id: Unique identifier for each coral fragment. This ID is consistent across files. Use this to join across datasets
+* row: Coral's location in experimental array; rows run approximately parallel to shore
+* parent_colony: Unique identifier of the parent colony (genotype) the coral fragment came from. Every parent colony experienced every treatment
+* treatment_full: Full treatment identifier, encompassing both structure (control/skeleton/hali/loboph) and snail (drupella or none) treatments
+* treatment_skeleton: Structure treatment identifier with categories for the four structure treatments (control/skeleton/hali/loboph)
+* treatment_drupella: Snail treatment identifier with categories for the two structure treatments (wounded = y or unwounded = n)
+* exclude_date: The date a coral was observed with predation signs. NA's indicate the coral was never predated upon 
+* exclude_reason: The predator responsible for coral exclusion
 
 ## File: coral_wet_weights_3mo.csv
 
-*Name*
+*Experimental coral weights*
 
-**Description:** XXX 
+**Description:** Weights of experimental corals before treatment application and after 3 months. Corals were wet weighed in the field using an OHAUS Scout Pro electronic scale in an enclosed box mounted to a tripod balanced above the water on a coral bommie. Epoxied bases were gently scrubbed with a toothbrush to remove any fouling organisms prior to weighing.
 
 #### Variables
 
-* coral_id: XXX
+* coral_id: Unique identifier for each coral fragment. This ID is consistent across files. Use this to join across datasets
+* date: Date coral was weighed
+* time_point: Category for the date of weighing--0 = before treatments were applied, 1 = at the end of 3 months
+* wet_weight_g: Weight of corals in grams
 
 ## File: tissue_cover.csv
 
-*Name*
+*Coral tissue cover*
 
-**Description:** XXX 
+**Description:** Coral tissue cover over the course of the experiment (3 months, 3.5 months, and 9 months) 
 
 #### Variables
 
-* coral_id: XXX
+* coral_id: Unique identifier for each coral fragment. This ID is consistent across files. Use this to join across datasets
+* tissue_cover_3mo: Percent of coral fragment covered in tissue on October 28. 100 = 100% tissue cover (i.e., 0% tissue loss since the start of the experiment)
+* tissue_cover_postmicrobe: Percent of coral fragment covered in tissue on November 14, after corals were sampled for their microbiomes. 100 = 100% tissue cover (i.e., 0% tissue loss since the start of the experiment)
+* tissue_cover_9mo: Percent of coral fragment covered in tissue on April 29-May 1, during the last timepoint of the experiment. 100 = 100% tissue cover (i.e., 0% tissue loss since the start of the experiment)
+* notes: Notes were added to explain why three corals were removed from Nov-May analysis
 
 ## File: wound_healing.csv
 
-*Name*
+*Rates of snail wound healing*
 
-**Description:** XXX 
+**Description:** Binary determination of whether snail wounds were healed or not across photographic time points.
 
 #### Variables
 
-* coral_id: XXX
+* coral_id: Unique identifier for each coral fragment. This ID is consistent across files. Use this to join across datasets
+* censored: Categorical marker representing whether a coral healed from the wound during the time period (i.e., censored = 1) or whether the coral did not heal before either: (1) the end of the experiment or (2) the coral was predated on by rogue *Drupella* or *Culcita* and removed from subsequent analyses (i.e., censored = 0)
+* exclude_date: The date a coral was observed with predation signs. NA's indicate the coral was never predated upon 
+* exclude_reason: The predator responsible for coral exclusion
+* observe_date: The date the photographs were taken that were used to determine if the wound had healed
+* wound_healed: Binary marker noting whether the wound was fully healed (wound_healed = 1) or not (wound_healed = 0) on observe_date
 
 ## File: wound_sizes.csv
 
-*Name*
+*Snail would sizes*
 
-**Description:** XXX 
+**Description:** Snail would sizes on experimental corals. Wounds were measured in ImageJ using reference lengths. 
 
 #### Variables
 
-* coral_id: XXX
+* coral_id: Unique identifier for each coral fragment. This ID is consistent across files. Use this to join across datasets
+* size_mm2: Measured length of snail wound in mm^2 
 
 ## File: snail_lengths.csv
 
-*Name*
+*Lengths of experimental Drupella*
 
-**Description:** XXX 
+**Description:** Lengths (i.e. tip of the shell apex to the edge of the bottom lip) of experimental *Drupella* used for snail treatments. 
 
 #### Variables
 
-* coral_id: XXX
+* coral_id: Unique identifier of coral fragment. This ID is consistent across files. Use this to join across datasets
+* snail_length_mm: Length of snail shells in mm 
 
 # R files
 
 ## File: analysis_initial_differences.Rmd
 
-**Description:** XXX 
+**Description:** Rmd file that calculates the general statistics used in the methods to note final sample sizes, average snail sizes, average wound sizes, and that there were no significant differences among treatments for snail or wound size.
 
 ## File: timeseries_mcr.Rmd
 
-**Description:** XXX 
+**Description:** Rmd file uses the Moorea Coral Reef Long Term Ecological Research time series to generate **Fig. 1a**
 
 ## File: analysis_weight.Rmd
 
-**Description:** XXX 
+**Description:** Rmd file that analyzes changes in coral weights over 3 months and produces **Fig. 2** 
 
 ## File: analysis_tissue_cover_3mo.Rmd
 
-**Description:** XXX 
+**Description:** Rmd file that analyzes changes in coral tissue cover over 3 months (July-November) and produces **Fig. S3**
 
 ## File: analysis_tissue_cover_9mo.Rmd
 
-**Description:** XXX 
+**Description:** Rmd file that analyzes changes in coral tissue cover over 6 months (November-May) and produces **Fig. 4**
 
 ## File: analysis_wound_healing.Rmd
 
-**Description:** XXX 
+**Description:** Rmd file that analyzes rates of wound healing and produces **Fig. 3**
 
