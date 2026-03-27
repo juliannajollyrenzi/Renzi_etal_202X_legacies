@@ -23,7 +23,8 @@ if (!require("librarian")) install.packages("librarian")
 # load required packages
 librarian::shelf(here, # relative file paths 
                  tidyverse, # data wrangling
-                 car # type II ANOVA
+                 car, # type II ANOVA
+                 glmmTMB # models
                  )
 ```
 
@@ -38,6 +39,17 @@ wound_size_1 <- read_csv(here("data", "wound_sizes.csv"))
 
 # metadata
 metadata <- read_csv(here("data", "metadata.csv"))
+```
+
+# Final sample sizes 
+
+After excluding predated coral, we note that there is still at least n = 12 per treatment
+
+```{r}
+metadata %>% 
+  filter(is.na(exclude_reason)) %>% 
+  group_by(treatment_full) %>% 
+  summarize(n = n()) 
 ```
 
 # Snail sizes
@@ -55,14 +67,12 @@ snails_2 %>%
             se_length = sd(snail_length_mm)/sqrt(n()))
 ```
 
-
 Check for any initial differences
 
 ```{r}
 mlength <- glmmTMB(snail_length_mm ~ treatment_skeleton, data = snails_2)
   car::Anova(mlength)
 ```
-
 
 # Initial wound size
 
@@ -84,17 +94,6 @@ Check for differences
 ```{r}
 msize <- glmmTMB(size_mm2 ~ treatment_skeleton, data = wound_size_2)
   car::Anova(msize) # looks good
-```
-
-# Final sample sizes 
-
-After excluding predated coral, we note that there is still at least n = 12 per treatment
-
-```{r}
-metadata %>% 
-  filter(is.na(exclude_reason)) %>% 
-  group_by(treatment_full) %>% 
-  summarize(n = n()) 
 ```
 
 

@@ -25,9 +25,9 @@ librarian::shelf(here, # relative file paths
                  tidyverse, # data wrangling
                  performance, # check model assumptions
                  survival, # creating survival objects
-                 coxme, # cox hazards models
                  survminer, # diagnostics
-                 ggbreak # broken axes
+                 ggbreak, # broken axes
+                 ggtext # axes lables
                  )
 ```
 

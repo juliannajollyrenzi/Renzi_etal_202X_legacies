@@ -68,34 +68,6 @@ tissue_1 %>%
                                      levels = c("Control", "Skeleton", "Halimeda skeleton", "Lobophora skeleton"))) -> tissue_2
 ```
 
-# Plot
-
-```{r}
-pdf(here("figures", "fig_S3_tissue.pdf"), height = 3, width = 4.5)
-
-tissue_2 %>% 
-  ggplot(aes(x = treatment_skeleton, y = tissue_loss_percent, fill = treatment_drupella)) +
-  geom_boxplot(outliers = FALSE) +
-  geom_jitter(aes(color = treatment_drupella),
-              #color = "black", shape = 21, alpha = 0.5
-              width = 0.15, size = 2, shape = 1, height = 0) + # use hollow circles
-  scale_color_manual(name = "Snail wound", labels = c("n" = "No", "y" = "Yes"),
-                     values = c(no.snail.col.dark, snail.col.dark)) +
-  scale_fill_manual(name = "Snail wound", labels = c("n" = "No", "y" = "Yes"),
-                     values = c(no.snail.col, snail.col)) +
-  theme_classic() +
-  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
-        legend.position = "top", axis.text.x = element_markdown(lineheight = 1)) +
-  ylab("Tissue loss (%)") +
-  xlab("") +  
-  scale_x_discrete(
-    labels = (c("Control" = "Control", "Skeleton" = "Skeleton",
-                "Halimeda skeleton" = "<i>Halimeda</i><br>skeleton",
-                "Lobophora skeleton" = "<i>Lobophora</i><br>skeleton")))
-
-dev.off()
-```
-
 # Model
 
 With interaction
@@ -128,4 +100,31 @@ Check model assumptions
 check_model(m2) # looks good
 ```
 
+# Plot
+
+```{r}
+pdf(here("figures", "fig_S3_tissue.pdf"), height = 3, width = 4.5)
+
+tissue_2 %>% 
+  ggplot(aes(x = treatment_skeleton, y = tissue_loss_percent, fill = treatment_drupella)) +
+  geom_boxplot(outliers = FALSE) +
+  geom_jitter(aes(color = treatment_drupella),
+              #color = "black", shape = 21, alpha = 0.5
+              width = 0.15, size = 2, shape = 1, height = 0) + # use hollow circles
+  scale_color_manual(name = "Snail wound", labels = c("n" = "No", "y" = "Yes"),
+                     values = c(no.snail.col.dark, snail.col.dark)) +
+  scale_fill_manual(name = "Snail wound", labels = c("n" = "No", "y" = "Yes"),
+                     values = c(no.snail.col, snail.col)) +
+  theme_classic() +
+  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+        legend.position = "top", axis.text.x = element_markdown(lineheight = 1)) +
+  ylab("Tissue loss (%)") +
+  xlab("") +  
+  scale_x_discrete(
+    labels = (c("Control" = "Control", "Skeleton" = "Skeleton",
+                "Halimeda skeleton" = "<i>Halimeda</i><br>skeleton",
+                "Lobophora skeleton" = "<i>Lobophora</i><br>skeleton")))
+
+dev.off()
+```
 

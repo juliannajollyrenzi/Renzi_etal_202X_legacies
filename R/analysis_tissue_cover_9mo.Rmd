@@ -53,6 +53,8 @@ metadata <- read_csv(here("data", "metadata.csv"))
 
 # Prepare data
 
+We sampled corals for microbes at the end of the 3-month experiment so we will use tissue cover data from after that sampling, on November 14, 2023 (`tissue_cover_postmicrobe`) compared with tissue cover data from the end of April/beginning of May (`tissue_cover_9mo`)
+
 ```{r}
 tissue_1 %>% 
   # add metadata
@@ -239,12 +241,70 @@ tissue_2 %>%
         legend.position = "top") -> mort.may.plt
 ```
 
+### Alternative: model outputs
+
+Get model dataframe
+
+```{r}
+grps1 <- as_tibble(cld(emmeans(m4, pairwise ~ skeleton_yn, type = "response"), Letters = letters)) %>%
+  # get rid of weird space
+  mutate(group = str_remove_all(.group, " "))
+```
+
+```{r}
+as_tibble(emmeans(m4, pairwise ~ skeleton_yn, type = "response")$emmeans) %>% 
+  full_join(grps) -> grps_3
+```
+
+Plot
+
+```{r}
+grps_3 %>% 
+  ggplot() +
+  geom_pointrange(aes(x = skeleton_yn, y = prob, ymin = asymp.LCL, ymax = asymp.UCL),
+                      size = .6, linewidth = .8) +
+  # make a new color scale
+  ggnewscale::new_scale_color() +
+  geom_jitter(data = tissue_2,
+              aes(x = skeleton_yn, y = total_mortality_yn, color = treatment_drupella),
+              width = 0.15, size = 2, shape = 1, height = 0) + # use hollow circles
+  scale_color_manual(name = "Snail wound", 
+                     labels = c("n" = "No", "y" = "Yes"),
+                     values = c(no.snail.col.dark, snail.col.dark)) +
+  theme_classic() +
+  theme(panel.border = element_rect(color = "black", 
+                                    fill = NA, linewidth = 1),
+        legend.position = "top") +
+  ylab("Probability of full mortality") +
+  xlab("") +
+  scale_x_discrete(labels = c("No" = "Control", "Yes" = "Skeleton")) +
+  # make a new color scale
+  ggnewscale::new_scale_color() +
+  geom_text(data = grps_3,
+            aes(label = group, x = skeleton_yn, y = asymp.UCL), 
+              vjust = -1, size = 5, color = "black") -> mort.may.plt2
+```
+
 ## Plot together
+
+Option #1:
 
 ```{r}
 pdf(here("figures", "fig_4_mortality.pdf"), height = 3.5 , width = 7)
 
 pp.may.plt + mort.may.plt + plot_annotation(tag_levels = 'a',
+                                            tag_prefix = '(',
+                                            tag_suffix = ')')
+
+dev.off()
+```
+
+Option #2:
+
+```{r}
+pdf(here("figures", "fig_4_mortality_2.pdf"), height = 3.5 , width = 7)
+
+pp.may.plt + mort.may.plt2 + plot_annotation(tag_levels = 'a',
                                             tag_prefix = '(',
                                             tag_suffix = ')')
 

@@ -114,7 +114,11 @@ Examine posthoc contrasts
 ```{r}
 # plot marginal means for skeleton treatment to see expected ordering
 plot(emmeans(mW2, ~ treatment_skeleton ))
+```
 
+And magnitudes
+
+```{r}
 # examine posthoc contrasts (pairwise is a shortcut for pairs())
 emmeans(mW2, pairwise ~ treatment_skeleton, 
         type = "response") # this is overkill (no link function and Gaussian)
