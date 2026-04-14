@@ -230,7 +230,7 @@ tissue_2 %>%
            aes(group = mortality_binary, fill = mortality_binary)) +
   ylab("Percent of corals") +
   xlab("") +
-  scale_x_discrete(labels = c("none" = "Control", "skeleton" = "Skeleton")) +
+  scale_x_discrete(labels = c("No" = "Control", "Yes" = "Skeleton")) +
   scale_fill_manual(name = "Status in May", values = c("Alive" = "#e69f00", "Dead" = "#0072b2")) +
   theme_classic() +
   geom_text(data = prop_corals,

@@ -277,7 +277,7 @@ healed_4 %>%
   geom_point(size = 2, alpha = 0.7) +
   xlab(expression(paste("Wound size (", mm^2, ")"))) +
   ylab("Time to healing (days)") +
-  scale_color_manual(name = "Skeleton treatment",
+  scale_color_manual(name = "Structure treatment",
                       values = c("#440154", "#3B528B", "#35B779FF", "#FDE725"),
                       labels = (c("control" = "Control", "skeleton" = "Skeleton",
                 "hali" = "<i>Halimeda</i> skeleton",
