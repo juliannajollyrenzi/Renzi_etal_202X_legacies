@@ -365,7 +365,7 @@ m8 <- glmmTMB(tissue_cover_9mo ~ skeleton_yn + treatment_drupella + (1|parent_co
 car::Anova(m8) # skeleton still important (even stronger this way)
 ```
 
-## Keep all structure treatments in
+## Keep all structure treatments in: tissue loss
 
 ```{r}
 m9 <- glmmTMB(tissue_loss_percent ~ treatment_skeleton + treatment_drupella + treatment_skeleton:treatment_drupella + (1|parent_colony), 
@@ -396,4 +396,36 @@ plot(emmeans(m10, pairwise ~ treatment_skeleton))
 ```
 
 See pattern is the same and the skeleton treatments all appear to behaving similarly, although some power is lost
+
+## Keep all structure treatments in: mortality
+
+```{r}
+m11 <- glmmTMB(total_mortality_yn ~ treatment_skeleton + treatment_drupella + treatment_skeleton:treatment_drupella + (1|parent_colony), 
+              family = binomial,
+              data = tissue_2)
+```
+
+```{r}
+car::Anova(m11) # not important--drop it
+```
+
+Without the interaction
+
+```{r}
+m12 <- glmmTMB(total_mortality_yn ~ treatment_skeleton + treatment_drupella + (1|parent_colony), 
+              family = binomial,
+              data = tissue_2)
+```
+
+```{r}
+car::Anova(m12) 
+```
+
+Examine trends:
+
+```{r}
+plot(emmeans(m12, pairwise ~ treatment_skeleton))
+```
+
+Again, see pattern is the same and the skeleton treatments all appear to behaving similarly, although some power is lost when we divide the skeleton treatments up
 

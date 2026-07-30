@@ -97,7 +97,7 @@ surv.1 <- Surv(time = healing_2$days_numeric, # time to death
 Full model
 
 ```{r}
-coxph.1 <- coxph(surv.1 ~ treatment_skeleton * size_mm2 + frailty(parent_colony), 
+coxph.1 <- coxph(surv.1 ~ treatment_skeleton + size_mm2 + frailty(parent_colony), 
                     data = healing_2) # response here must be a survival object returned by the Surv funtion (why we make the surv_object above)
 ```
 
@@ -110,64 +110,45 @@ summary(coxph.1)
 Get X^2 using reduced model approach--can't use `car::Anova()` reliably here (want the likelihood ratio test not the Wald). First make reduced model:
 
 ```{r}
-coxph.2 <- coxph(surv.1 ~ treatment_skeleton + size_mm2 + frailty(parent_colony), 
+coxph.2 <- coxph(surv.1 ~ treatment_skeleton + frailty(parent_colony), 
                     data = healing_2)
 ```
 
 ```{r}
-anova(coxph.1, coxph.2) # no difference
-```
-
-So, can drop the interaction. Interpret the other coefficients:
-
-```{r}
-coxph.3 <- coxph(surv.1 ~ treatment_skeleton + frailty(parent_colony), 
-                    data = healing_2)
-```
-
-```{r}
-coxph.4 <- coxph(surv.1 ~ size_mm2 + frailty(parent_colony), 
+coxph.3 <- coxph(surv.1 ~ size_mm2 + frailty(parent_colony), 
                     data = healing_2)
 ```
 
 Compare for **size** treatment (drop structure):
 
 ```{r}
-anova(coxph.2, coxph.3) # important
+anova(coxph.1, coxph.2) # size is important
 ```
 
 And for **structure** treatment (drop size)
 
 ```{r}
-anova(coxph.2, coxph.4) # not important
+anova(coxph.1, coxph.3) # structure is not important
 ```
 
 # Test model assumptions
 
-We want to test that the hazards are proportional (don't change over time), which is assumed in the cox model. We'll use scaled Schoenfeld residuals, which are independent of time and should have a random pattern. The random assumption is supported by p > 0.05. 
-
-```{r test Schoenfeld}
-test.ph <- cox.zph(coxph.2) 
-  test.ph # global meets assumption
-  plot(test.ph)
-```
-
-Influential observations
+Test for influential observations
 
 ```{r}
-ggcoxdiagnostics(coxph.2, type = "dfbeta", # dfbeta plots the estimated changes in the regression coefficients upon deleting each observation in turn
+ggcoxdiagnostics(coxph.1, type = "dfbeta", # dfbeta plots the estimated changes in the regression coefficients upon deleting each observation in turn
                  ggtheme = theme_bw()) # looks like not much change
 ```
 
-Nonlinearity assumption
+Check nonlinearity assumption
 
 ```{r}
-resid <- residuals(coxph.2, type="martingale") # for nonlinearity assumption, line should be horizontal and not angling
+resid <- residuals(coxph.1, type="martingale") # for nonlinearity assumption, line should be horizontal and not angling
 
 mr <- cbind(size_mm2 = healing_2$size_mm2, resid)
 ```
 
-Plot--looks pretty horizontal and non-angling
+Plot:
 
 ```{r}
 ggplot(data = mr,
@@ -175,14 +156,29 @@ ggplot(data = mr,
   geom_point() + 
   geom_smooth() +
   xlab("Age") + 
-  ylab("Martingale Residuals")
+  ylab("Martingale Residuals") # looks pretty horizontal and non-angling so proceed
 ```
+
+Next, we'll test that the hazards are proportional (i.e., they don't change over time), which is assumed in the Cox model. We'll use scaled Schoenfeld residuals, which are independent of time and should have a random pattern. The random assumption is supported by p > 0.05. 
+
+```{r test Schoenfeld}
+test.ph <- cox.zph(coxph.1) 
+  test.ph # global meets assumption, but size does not
+```
+
+Examine the change in size effects through time:
+
+```{r}
+plot(test.ph) # does not look flat
+```
+
+Given that the effect of wound size varies with time, we'll use a time-varying hazards model
 
 # Use time-varying hazards model
 
 ## Wrangle
 
-Generally looks good, but size has a bit of a changing effect. Check to make sure results don't change with a time-varying hazards model
+Wrangle data to work in a time-varying hazards model
 
 ```{r}
 healing_1 %>% 
@@ -200,49 +196,35 @@ healing_1 %>%
 Full model:
 
 ```{r}
-coxph.t.1 <- coxph(Surv(tstart, tstop, event = wound_healed) ~ treatment_skeleton + size_mm2 + size_mm2:treatment_skeleton + frailty(parent_colony), 
+coxph.t.1 <- coxph(Surv(tstart, tstop, event = wound_healed) ~ treatment_skeleton + size_mm2 + frailty(parent_colony), 
                    data = healing_3)
   summary(coxph.t.1)
 ```
 
-Drop interaction:
+Drop each individual term to examine their effects:
 
 ```{r}
-coxph.t.2 <- coxph(Surv(tstart, tstop, event = wound_healed) ~ treatment_skeleton + size_mm2 + frailty(parent_colony), 
-                   data = healing_3)
-  summary(coxph.t.2)
-```
-
-Drop each individual term
-
-```{r}
-coxph.t.3 <- coxph(Surv(tstart, tstop, event = wound_healed) ~ treatment_skeleton + frailty(parent_colony), 
+coxph.t.2 <- coxph(Surv(tstart, tstop, event = wound_healed) ~ treatment_skeleton + frailty(parent_colony), 
                    data = healing_3)
 ```
 
 ```{r}
-coxph.t.4 <- coxph(Surv(tstart, tstop, event = wound_healed) ~ size_mm2 + frailty(parent_colony), 
+coxph.t.3 <- coxph(Surv(tstart, tstop, event = wound_healed) ~ size_mm2 + frailty(parent_colony), 
                    data = healing_3)
 ```
 
 ## Model comparisons
 
-Compare interaction with no interaction
-
-```{r}
-anova(coxph.t.1, coxph.t.2) # no difference--drop interaction
-```
-
 Examine importance of size (i.e., dropped it--structure-only treatment):
 
 ```{r}
-anova(coxph.t.1, coxph.t.3) # marginal
+anova(coxph.t.1, coxph.t.2) # size is important (makes the model worse when we drop it)
 ```
 
 Examine importance of structure (i.e., dropped it--size-only treatment):
 
 ```{r}
-anova(coxph.t.1, coxph.t.4) # not important
+anova(coxph.t.1, coxph.t.3) # structure is not detectably important
 ```
 
 # Plot healing times
