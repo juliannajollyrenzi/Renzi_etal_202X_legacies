@@ -120,7 +120,7 @@ Schneider CA, Rasband WS, Eliceiri KW (2012) NIH Image to ImageJ: 25 years of im
 
 *Rates of snail wound healing*
 
-**Description:** Binary determination of whether snail wounds were healed or not across photographic time points.
+**Description:** Binary determination of whether snail wounds were healed or not across photographic time points
 
 #### Variables
 
