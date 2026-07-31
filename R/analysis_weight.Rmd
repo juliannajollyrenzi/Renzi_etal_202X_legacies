@@ -28,7 +28,8 @@ librarian::shelf(here, # relative file paths
                  emmeans, # posthoc contrasts
                  performance, # model assumptions
                  multcomp, # cld
-                 ggtext # for complicated axes labels
+                 ggtext, # for complicated axes labels
+                 patchwork # for multiple panels
                  )
 ```
 
@@ -58,7 +59,7 @@ weights_1 %>%
               names_from = time_point,
               values_from = wet_weight_g) %>% 
   # calculate percent change
-  mutate(percent_change = ((`1`-`0`)/`0`) * 100) %>% 
+  mutate(change = (`1`-`0`)) %>% 
   # join with metadata
   full_join(metadata) %>% 
   # make structure labels nice for plotting
@@ -72,67 +73,53 @@ weights_1 %>%
 
 # Model weight change
 
-## With an interaction
+Also significant/similar conclusions if we use `1` (final weight) or percent weight change instead of actual change 
 
 ```{r}
-mW1 <- glmmTMB(percent_change ~ treatment_skeleton + treatment_drupella + 
+mW1 <- glmmTMB(change ~ treatment_skeleton + treatment_drupella + 
                  treatment_skeleton:treatment_drupella + `0` + (1|parent_colony),  
               data = weights_2)
 ```
 
-Examine outputs and check whether interaction was important
+Examine outputs and which terms were important
 
 ```{r}
 summary(mW1)
 car::Anova(mW1) # interaction is not important 
 ```
 
-## Without the interaction
-
-Drop the interaction because it does not appear important 
-
-```{r}
-mW2 <- glmmTMB(percent_change ~ treatment_skeleton + treatment_drupella + `0` + (1|parent_colony), 
-              data = weights_2)
-```
-
-Examine outputs and check whether interaction was important
-
-```{r}
-summary(mW2)
-car::Anova(mW2) # interaction is not important 
-```
-
-Check model 
-
-```{r}
-check_model(mW2) # looks good
-```
-
 Examine posthoc contrasts
 
 ```{r}
 # plot marginal means for skeleton treatment to see expected ordering
-plot(emmeans(mW2, ~ treatment_skeleton ))
+plot(emmeans(mW1, ~ treatment_skeleton))
 ```
 
 And magnitudes
 
 ```{r}
 # examine posthoc contrasts (pairwise is a shortcut for pairs())
-emmeans(mW2, pairwise ~ treatment_skeleton, 
+emmeans(mW1, pairwise ~ treatment_skeleton, 
         type = "response") # this is overkill (no link function and Gaussian)
 
-emmeans(mW2, pairwise ~ treatment_drupella, 
+emmeans(mW1, pairwise ~ treatment_drupella, 
         type = "response") # this is overkill (no link function and Gaussian)
 ```
+
+Or do we need to look at these within interactions?
+
+```{r}
+emmeans(mW1, pairwise ~ treatment_skeleton | treatment_drupella, 
+        type = "response")
+```
+
 
 # Plot model and data
 
 Get model dataframe. First, get compact letter displays from the package `cld` and pairwise `emmeeans` comparisons
 
 ```{r}
-grps <- as_tibble(cld(emmeans(mW2, pairwise ~ treatment_skeleton | treatment_drupella, 
+grps <- as_tibble(cld(emmeans(mW1, pairwise ~ treatment_skeleton | treatment_drupella, 
                               type = "response"), 
                       Letters = letters)) %>% 
   # make a nicer grouping variable without spaces
@@ -147,7 +134,7 @@ grps <- as_tibble(cld(emmeans(mW2, pairwise ~ treatment_skeleton | treatment_dru
 Then join with the estimated marginal means and errors from the main `emmeans` call
 
 ```{r}
-as_tibble(emmeans(mW2, pairwise ~ treatment_skeleton | treatment_drupella, 
+as_tibble(emmeans(mW1, pairwise ~ treatment_skeleton | treatment_drupella, 
                   # response is overkill here as well 
                   type = "response")$emmeans) %>% 
   full_join(grps) -> grps_2
@@ -204,5 +191,137 @@ grps_2 %>%
 dev.off()
 ```
 
+# New figure version: Revisions
 
+Get our marginal means using `emmeans`
+
+```{r}
+emm_skel  <- emmeans(mW1, ~ treatment_skeleton) # marginal means, averaged over snail
+
+emm_snail <- emmeans(mW1, ~ treatment_drupella)   # marginal means, averaged over 
+```
+
+Get compact letter displays for structure and snail treatments
+
+```{r}
+bind_rows(
+  as_tibble(cld(emm_skel, Letters = letters)) %>% 
+    rename(level = treatment_skeleton) %>% 
+    mutate(factor = "Structure treatment"),
+  as_tibble(cld(emm_snail, Letters = letters)) %>% 
+    rename(level = treatment_drupella) %>% 
+    mutate(factor = "Snail wound")
+) %>% 
+  # tidy the grouping variable (has those weird spaces)
+  mutate(group = str_remove_all(.group, " "),
+         level = as.character(level),
+         # change labels so italics show on plot
+         level_label = case_when(
+           level == "Halimeda skeleton"  ~ "<i>Halimeda</i><br>skeleton",
+           level == "Lobophora skeleton" ~ "<i>Lobophora</i><br>skeleton",
+           level == "n" ~ "No",
+           level == "y" ~ "Yes",
+           TRUE ~ level),
+         level_label = factor(level_label,
+                              levels = c("No", "Yes", "Control", "Skeleton", "<i>Halimeda</i><br>skeleton", "<i>Lobophora</i><br>skeleton") )
+                              ) %>% 
+  dplyr::select(-`.group`) -> marg
+```
+
+Make labels
+
+```{r}
+# shared x-axis labels for panel a
+skel_labs <- c("Control" = "Control",
+               "Skeleton" = "Skeleton",
+               "Halimeda skeleton" = "<i>Halimeda</i><br>skeleton",
+               "Lobophora skeleton" = "<i>Lobophora</i><br>skeleton")
+```
+
+Panel a (cell means with raw data - keep interaction term in):
+
+```{r}
+weights_2 %>% 
+  ggplot() +
+  geom_boxplot(aes(x = treatment_skeleton, y = change,
+                  fill = treatment_drupella),
+               outlier.shape = NA) +
+  scale_fill_manual(name = "Snail wound", labels = c("n" = "No", "y" = "Yes"),
+                     values = c(no.snail.col, snail.col)) +
+  geom_jitter(aes(x = treatment_skeleton, y = change,
+                  color = treatment_drupella),
+              # shape 21 with no fill: outline only, stroke set outside aes()
+              size = 2, shape = 21, fill = NA, stroke = 0.5,
+              position = position_jitterdodge(jitter.width = 0.15,
+                                              jitter.height = 0,
+                                              dodge.width = 0.5)) +
+  scale_color_manual(name = "Snail wound", labels = c("n" = "No", "y" = "Yes"),
+                     values = c(no.snail.col.dark, snail.col.dark)) +
+  scale_x_discrete(labels = skel_labs) +
+  theme_classic() +
+  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+        strip.background = element_blank(),
+        legend.position = "top",
+        axis.text.x = element_markdown(lineheight = 1)) +
+  ylab("Weight change (g)") +
+  xlab("") -> plt.a
+```
+
+Panel B: 
+
+```{r}
+marg %>% 
+  filter(factor == "Snail wound") %>% 
+  ggplot() +
+  geom_pointrange(aes(x = level_label, y = emmean,
+                      ymin = lower.CL, ymax = upper.CL),
+                  size = .8, linewidth = .8, color = "black") +
+  geom_text(aes(x = level_label, y = upper.CL, label = group),
+            vjust = -0.8, size = 4, color = "black") +
+  scale_y_continuous(expand = expansion(mult = c(0.05, 0.20))) +
+  theme_classic() +
+  theme(axis.line = element_blank(),
+        panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+        axis.text.x = element_markdown(lineheight = 1)) +
+  ylab("Weight change (g)") +
+  xlab("Snail wound") -> plt.b
+```
+
+Panel C:
+
+```{r}
+marg %>% 
+  filter(factor == "Structure treatment") %>% 
+  ggplot() +
+  geom_pointrange(aes(x = level_label, y = emmean,
+                      ymin = lower.CL, ymax = upper.CL),
+                  size = .8, linewidth = .8, color = "black") +
+  geom_text(aes(x = level_label, y = upper.CL, label = group),
+            vjust = -0.8, size = 4, color = "black") +
+  scale_y_continuous(expand = expansion(mult = c(0.05, 0.20))) +
+  theme_classic() +
+  theme(axis.line = element_blank(),
+        panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+        axis.text.x = element_markdown(lineheight = 1),
+        # drop the duplicated y-axis on the right-hand plot
+        axis.title.y = element_blank()) +
+  ylab(NULL) +
+  xlab("Structure treatment") -> plt.c
+```
+
+
+Plot together:
+
+```{r}
+pdf(here("figures", "fig_2_weights.pdf"), height = 5.5, width = 6)
+
+# tags set directly so the two (b) sub-plots share one label
+plt.a  <- plt.a  + labs(tag = "(a)")
+plt.b <- plt.b + labs(tag = "(b)")
+
+
+plt.a / (plt.b + plt.c + plot_layout(widths = c(2, 4))) +
+  plot_layout(heights = c(1, 0.85))
+dev.off()
+```
 
