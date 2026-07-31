@@ -135,7 +135,7 @@ Schneider CA, Rasband WS, Eliceiri KW (2012) NIH Image to ImageJ: 25 years of im
 
 *Snail would sizes*
 
-**Description:** Snail would sizes on experimental corals. Wounds were measured in ImageJ using reference lengths. 
+**Description:** Snail would sizes on experimental corals. Wounds were measured in ImageJ using reference lengths 
 
 #### Variables
 
@@ -157,7 +157,7 @@ Schneider CA, Rasband WS, Eliceiri KW (2012) NIH Image to ImageJ: 25 years of im
 
 ## File: analysis_initial_differences.Rmd
 
-**Description:** Rmd file that calculates the general statistics used in the methods to note final sample sizes, average snail sizes, average wound sizes, and that there were no significant differences among treatments for snail or wound size.
+**Description:** Rmd file that calculates the general statistics used in the methods to note final sample sizes, average snail sizes, average wound sizes, and that there were no significant differences among treatments for snail or wound size
 
 ## File: timeseries_mcr.Rmd
 
