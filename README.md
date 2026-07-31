@@ -85,7 +85,7 @@ Schneider CA, Rasband WS, Eliceiri KW (2012) NIH Image to ImageJ: 25 years of im
 * parent_colony: Unique identifier of the parent colony (genotype) the coral fragment came from. Every parent colony experienced every treatment
 * treatment_full: Full treatment identifier, encompassing both structure (control/skeleton/hali/loboph) and snail (drupella or none) treatments
 * treatment_skeleton: Structure treatment identifier with categories for the four structure treatments (control/skeleton/hali/loboph)
-* treatment_drupella: Snail treatment identifier with categories for the two structure treatments (wounded = y or unwounded = n)
+* treatment_drupella: Snail treatment identifier with categories for the two snail treatments (wounded = y or unwounded = n)
 * exclude_date: The date a coral was observed with predation signs. NA's indicate the coral was never predated upon 
 * exclude_reason: The predator responsible for coral exclusion
 
