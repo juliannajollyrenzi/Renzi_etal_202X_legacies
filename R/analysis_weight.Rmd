@@ -240,6 +240,7 @@ plt.b <- plt.b + labs(tag = "(b)")
 
 plt.a / (plt.b + plt.c + plot_layout(widths = c(2, 4))) +
   plot_layout(heights = c(1, 0.85))
+
 dev.off()
 ```
 

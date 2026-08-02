@@ -57,7 +57,10 @@ tissue_1 %>%
   # filter out corals we need to exclude
   filter(is.na(exclude_date)) %>% 
   # calculate tissue loss
-  mutate(tissue_loss_percent = 100 - tissue_cover_3mo) %>% 
+  mutate(tissue_loss_percent = 100 - tissue_cover_3mo,
+         # and in decimal format
+         tissue_loss_percent_d = tissue_loss_percent/100,
+         ) %>% 
   # get labels nice
   mutate(treatment_skeleton = case_when(treatment_skeleton == "control" ~ "Control",
                                         treatment_skeleton == "hali" ~ "Halimeda skeleton",
@@ -73,8 +76,8 @@ tissue_1 %>%
 Create our tissue loss model
 
 ```{r}
-m1 <- glmmTMB(tissue_loss_percent ~ treatment_skeleton + treatment_drupella + treatment_skeleton:treatment_drupella + (1|parent_colony), 
-              family = tweedie(link = "log"),
+m1 <- glmmTMB(tissue_loss_percent_d ~ treatment_skeleton + treatment_drupella + treatment_skeleton:treatment_drupella + (1|parent_colony), 
+              family = ordbeta(),
               data = tissue_2)
 ```
 
@@ -91,7 +94,7 @@ check_model(m1) # looks good
 # Plot
 
 ```{r}
-pdf(here("figures", "fig_S3_tissue.pdf"), height = 3, width = 4.5)
+pdf(here("figures", "fig_S4_tissue.pdf"), height = 3, width = 4.5)
 
 tissue_2 %>% 
   ggplot(aes(x = treatment_skeleton, y = tissue_loss_percent, fill = treatment_drupella)) +
