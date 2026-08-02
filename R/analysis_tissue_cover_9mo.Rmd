@@ -81,42 +81,30 @@ tissue_1 %>%
 
 # Model
 
-## Tissue loss (PP change)
+## Tissue loss (p.p. change)
 
-First, with the interaction
+Make the tissue loss model using percentage point change
 
 ```{r}
-m1 <- glmmTMB(tissue_loss_pp ~ skeleton_yn + treatment_drupella + skeleton_yn:treatment_drupella + (1|parent_colony), 
+m1 <- glmmTMB(tissue_loss_pp ~ skeleton_yn + treatment_drupella + (1|parent_colony), 
               family = gaussian,
               data = tissue_2)
 ```
 
-```{r}
-car::Anova(m1) # not important--drop it
-```
-
-Then, without the interaction
+Examine model
 
 ```{r}
-m2 <- glmmTMB(tissue_loss_pp ~ skeleton_yn + treatment_drupella + (1|parent_colony), 
-              family = gaussian,
-              data = tissue_2)
+check_model(m1)
 ```
 
 ```{r}
-car::Anova(m2) 
+car::Anova(m1) # interaction not important, skeleton is
 ```
 
 Check magnitude
 
 ```{r}
-emmeans(m2, pairwise ~ skeleton_yn)
-```
-
-Check model residuals
-
-```{r}
-check_model(m2) # not perfect, but should be OK
+emmeans(m1, pairwise ~ skeleton_yn)
 ```
 
 ## Full mortality 
@@ -124,31 +112,27 @@ check_model(m2) # not perfect, but should be OK
 Also model the probability of complete mortality (i.e., tissue cover = 0% after 9 months)
 
 ```{r}
-m3 <- glmmTMB(total_mortality_yn ~ skeleton_yn + treatment_drupella + skeleton_yn:treatment_drupella + (1|parent_colony), 
+m2 <- glmmTMB(total_mortality_yn ~ skeleton_yn + treatment_drupella + (1|parent_colony), 
               family = binomial,
               data = tissue_2)
 ```
 
+Examine model fit
+
 ```{r}
-car::Anova(m3)
+check_model(m2)
 ```
 
-Drop the interaction
+Look at terms
 
 ```{r}
-m4 <- glmmTMB(total_mortality_yn ~ skeleton_yn + treatment_drupella + (1|parent_colony), 
-              family = binomial,
-              data = tissue_2)
-```
-
-```{r}
-car::Anova(m4)
+car::Anova(m2)
 ```
 
 Examine the magnitude
 
 ```{r}
-summary(m4) # coefficient for skeleton is 2.418
+summary(m2) # coefficient for skeleton is 2.418
 
 exp(2.418) # means the odds of “success” (i.e., dying) for a coral in the skeleton treatment is about 11.22 times higher than the odds of dying for a control coral
 ```
@@ -160,13 +144,13 @@ exp(2.418) # means the odds of “success” (i.e., dying) for a coral in the sk
 Get model dataframe
 
 ```{r}
-grps <- as_tibble(cld(emmeans(m2, pairwise ~ skeleton_yn), Letters = letters)) %>% 
+grps <- as_tibble(cld(emmeans(m1, pairwise ~ skeleton_yn), Letters = letters)) %>% 
   # get rid of weird space
   mutate(group = str_remove_all(.group, " "))
 ```
 
 ```{r}
-as_tibble(emmeans(m2, pairwise ~ skeleton_yn)$emmeans) %>% 
+as_tibble(emmeans(m1, pairwise ~ skeleton_yn)$emmeans) %>% 
   full_join(grps) -> grps_2
 ```
 
@@ -241,70 +225,12 @@ tissue_2 %>%
         legend.position = "top") -> mort.may.plt
 ```
 
-### Alternative: model outputs
-
-Get model dataframe
-
-```{r}
-grps1 <- as_tibble(cld(emmeans(m4, pairwise ~ skeleton_yn, type = "response"), Letters = letters)) %>%
-  # get rid of weird space
-  mutate(group = str_remove_all(.group, " "))
-```
-
-```{r}
-as_tibble(emmeans(m4, pairwise ~ skeleton_yn, type = "response")$emmeans) %>% 
-  full_join(grps) -> grps_3
-```
-
-Plot
-
-```{r}
-grps_3 %>% 
-  ggplot() +
-  geom_pointrange(aes(x = skeleton_yn, y = prob, ymin = asymp.LCL, ymax = asymp.UCL),
-                      size = .6, linewidth = .8) +
-  # make a new color scale
-  ggnewscale::new_scale_color() +
-  geom_jitter(data = tissue_2,
-              aes(x = skeleton_yn, y = total_mortality_yn, color = treatment_drupella),
-              width = 0.15, size = 2, shape = 1, height = 0) + # use hollow circles
-  scale_color_manual(name = "Snail wound", 
-                     labels = c("n" = "No", "y" = "Yes"),
-                     values = c(no.snail.col.dark, snail.col.dark)) +
-  theme_classic() +
-  theme(panel.border = element_rect(color = "black", 
-                                    fill = NA, linewidth = 1),
-        legend.position = "top") +
-  ylab("Probability of full mortality") +
-  xlab("") +
-  scale_x_discrete(labels = c("No" = "Control", "Yes" = "Skeleton")) +
-  # make a new color scale
-  ggnewscale::new_scale_color() +
-  geom_text(data = grps_3,
-            aes(label = group, x = skeleton_yn, y = asymp.UCL), 
-              vjust = -1, size = 5, color = "black") -> mort.may.plt2
-```
-
 ## Plot together
-
-Option #1:
 
 ```{r}
 pdf(here("figures", "fig_4_mortality.pdf"), height = 3.5 , width = 7)
 
 pp.may.plt + mort.may.plt + plot_annotation(tag_levels = 'a',
-                                            tag_prefix = '(',
-                                            tag_suffix = ')')
-
-dev.off()
-```
-
-Option #2:
-
-```{r}
-pdf(here("figures", "fig_4_mortality_2.pdf"), height = 3.5 , width = 7)
-
-pp.may.plt + mort.may.plt2 + plot_annotation(tag_levels = 'a',
                                             tag_prefix = '(',
                                             tag_suffix = ')')
 
@@ -318,81 +244,43 @@ dev.off()
 First, with the interaction
 
 ```{r}
-m5 <- glmmTMB(tissue_loss_percent ~ skeleton_yn + treatment_drupella + skeleton_yn:treatment_drupella + (1|parent_colony), 
+m3 <- glmmTMB(tissue_loss_percent ~ skeleton_yn + treatment_drupella + (1|parent_colony), 
               family = gaussian,
               data = tissue_2)
 ```
 
 ```{r}
-car::Anova(m5) # not important--drop it
+car::Anova(m3) # skeleton still important (even stronger this way)
 ```
 
-Without the interaction
+## Absolute tissue cover in May 
 
 ```{r}
-m6 <- glmmTMB(tissue_loss_percent ~ skeleton_yn + treatment_drupella + (1|parent_colony), 
+m4 <- glmmTMB(tissue_cover_9mo ~ skeleton_yn + treatment_drupella + (1|parent_colony), 
               family = gaussian,
               data = tissue_2)
 ```
 
 ```{r}
-car::Anova(m6) # skeleton still important (even stronger this way)
-```
-
-## Absolute tissue cover in may 
-
-First, with the interaction
-
-```{r}
-m7 <- glmmTMB(tissue_cover_9mo ~ skeleton_yn + treatment_drupella + skeleton_yn:treatment_drupella + (1|parent_colony), 
-              family = gaussian,
-              data = tissue_2)
-```
-
-```{r}
-car::Anova(m7) # not important--drop it
-```
-
-Without the interaction
-
-```{r}
-m8 <- glmmTMB(tissue_cover_9mo ~ skeleton_yn + treatment_drupella + (1|parent_colony), 
-              family = gaussian,
-              data = tissue_2)
-```
-
-```{r}
-car::Anova(m8) # skeleton still important (even stronger this way)
+car::Anova(m4) # skeleton still important
 ```
 
 ## Keep all structure treatments in: tissue loss
 
 ```{r}
-m9 <- glmmTMB(tissue_loss_percent ~ treatment_skeleton + treatment_drupella + treatment_skeleton:treatment_drupella + (1|parent_colony), 
+m5 <- glmmTMB(tissue_loss_percent ~ treatment_skeleton + treatment_drupella + (1|parent_colony), 
               family = gaussian,
               data = tissue_2)
 ```
 
 ```{r}
-car::Anova(m9) # not important--drop it
-```
-
-Without the interaction
-
-```{r}
-m10 <- glmmTMB(tissue_loss_percent ~ treatment_skeleton + treatment_drupella + (1|parent_colony), 
-              family = gaussian,
-              data = tissue_2)
-```
-
-```{r}
-car::Anova(m10) 
+car::Anova(m5) # marginal
 ```
 
 Examine trends:
 
 ```{r}
-plot(emmeans(m10, pairwise ~ treatment_skeleton))
+plot(emmeans(m5, pairwise ~ treatment_skeleton))
 ```
 
 See pattern is the same and the skeleton treatments all appear to behaving similarly, although some power is lost
@@ -400,31 +288,19 @@ See pattern is the same and the skeleton treatments all appear to behaving simil
 ## Keep all structure treatments in: mortality
 
 ```{r}
-m11 <- glmmTMB(total_mortality_yn ~ treatment_skeleton + treatment_drupella + treatment_skeleton:treatment_drupella + (1|parent_colony), 
+m6 <- glmmTMB(total_mortality_yn ~ treatment_skeleton + treatment_drupella + (1|parent_colony), 
               family = binomial,
               data = tissue_2)
 ```
 
 ```{r}
-car::Anova(m11) # not important--drop it
-```
-
-Without the interaction
-
-```{r}
-m12 <- glmmTMB(total_mortality_yn ~ treatment_skeleton + treatment_drupella + (1|parent_colony), 
-              family = binomial,
-              data = tissue_2)
-```
-
-```{r}
-car::Anova(m12) 
+car::Anova(m6) 
 ```
 
 Examine trends:
 
 ```{r}
-plot(emmeans(m12, pairwise ~ treatment_skeleton))
+plot(emmeans(m6, pairwise ~ treatment_skeleton))
 ```
 
 Again, see pattern is the same and the skeleton treatments all appear to behaving similarly, although some power is lost when we divide the skeleton treatments up

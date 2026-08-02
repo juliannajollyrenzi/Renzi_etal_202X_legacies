@@ -70,7 +70,7 @@ tissue_1 %>%
 
 # Model
 
-With interaction
+Create our tissue loss model
 
 ```{r}
 m1 <- glmmTMB(tissue_loss_percent ~ treatment_skeleton + treatment_drupella + treatment_skeleton:treatment_drupella + (1|parent_colony), 
@@ -82,22 +82,10 @@ m1 <- glmmTMB(tissue_loss_percent ~ treatment_skeleton + treatment_drupella + tr
 car::Anova(m1)
 ```
 
-Drop interaction
-
-```{r}
-m2 <- glmmTMB(tissue_loss_percent ~ treatment_skeleton + treatment_drupella + (1|parent_colony), 
-              family = tweedie(link = "log"),
-              data = tissue_2)
-```
-
-```{r}
-car::Anova(m2)
-```
-
 Check model assumptions
 
 ```{r}
-check_model(m2) # looks good
+check_model(m1) # looks good
 ```
 
 # Plot
