@@ -81,6 +81,10 @@ mW1 <- glmmTMB(change ~ treatment_skeleton + treatment_drupella +
               data = weights_2)
 ```
 
+```{r}
+check_model(mW1)
+```
+
 Examine outputs and which terms were important
 
 ```{r}
@@ -106,94 +110,9 @@ emmeans(mW1, pairwise ~ treatment_drupella,
         type = "response") # this is overkill (no link function and Gaussian)
 ```
 
-Or do we need to look at these within interactions?
-
-```{r}
-emmeans(mW1, pairwise ~ treatment_skeleton | treatment_drupella, 
-        type = "response")
-```
-
-
 # Plot model and data
 
-Get model dataframe. First, get compact letter displays from the package `cld` and pairwise `emmeeans` comparisons
-
-```{r}
-grps <- as_tibble(cld(emmeans(mW1, pairwise ~ treatment_skeleton | treatment_drupella, 
-                              type = "response"), 
-                      Letters = letters)) %>% 
-  # make a nicer grouping variable without spaces
-  mutate(.group = str_remove_all(.group, " ")) %>% 
-  rename(group = .group) %>% 
-  # add spaces for plotting aesthetics
-  mutate(group = case_when(group == "a" ~ "  a",
-                           group == "c" ~ "  c",
-                           TRUE ~ group))
-```
-
-Then join with the estimated marginal means and errors from the main `emmeans` call
-
-```{r}
-as_tibble(emmeans(mW1, pairwise ~ treatment_skeleton | treatment_drupella, 
-                  # response is overkill here as well 
-                  type = "response")$emmeans) %>% 
-  full_join(grps) -> grps_2
-```
-
-Plot together with raw data and save as a PDF in our `figures` folder
-
-```{r}
-pdf(here("figures", "fig_2_weights.pdf"), height = 3, width = 5.25)
-
-grps_2 %>% 
-  ggplot() +
-  geom_pointrange(aes(x = treatment_skeleton, y = emmean, 
-                      color = treatment_drupella,
-                      ymin = lower.CL, ymax = upper.CL),
-                      size = .8, linewidth = .8,
-                  position = position_dodge(width = 0.5)) +
-  scale_color_manual(name = "Snail wound", labels = c("n" = "No", "y" = "Yes"),
-                     values = c(no.snail.col, snail.col)) +
-  # make a new color scale
-  ggnewscale::new_scale_color() +
-  # add raw data
-  geom_jitter(data = weights_2,
-              aes(x = treatment_skeleton, 
-                  y = percent_change, 
-                  # need to use fill here with shape 21 to force the offset 
-                  fill = treatment_drupella,
-                  stroke = .5, # controls size of outline
-                  fill = NA, # don't actually want the fill so we can see the points well (just for grouping)
-                  color = treatment_drupella),
-              size = 2, shape = 21,
-              position = position_jitterdodge(
-                jitter.width = 0.15,
-                jitter.height = 0,
-                dodge.width = 0.5 # matching the position_dodge() above
-              )
-  ) +
-  scale_color_manual(name = "Snail wound", labels = c("n" = "No", "y" = "Yes"),
-                     values = c(no.snail.col.dark, snail.col.dark)) +
-  theme_classic() +
-  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
-        legend.position = "top", axis.text.x = element_markdown(lineheight = 1)) +
-  ylab("Weight change (%)") +
-  xlab("") +
-  scale_x_discrete(
-    labels = (c("Control" = "Control", "Skeleton" = "Skeleton",
-                "Halimeda skeleton" = "<i>Halimeda</i><br>skeleton",
-                "Lobophora skeleton" = "<i>Lobophora</i><br>skeleton"))) +
-  ggnewscale::new_scale_color() +
-  geom_text(data = subset(grps_2, treatment_drupella == "n"),
-            aes(label = group, x = treatment_skeleton, y = emmean), 
-              vjust = -1.5, hjust = 3, size = 4, color = "black") 
-
-dev.off()
-```
-
-# New figure version: Revisions
-
-Get our marginal means using `emmeans`
+Get model dataframe for plotting. First, get pairwise `emmeeans` comparisons and compact letter displays from the package `cld`.
 
 ```{r}
 emm_skel  <- emmeans(mW1, ~ treatment_skeleton) # marginal means, averaged over snail
@@ -228,7 +147,7 @@ bind_rows(
   dplyr::select(-`.group`) -> marg
 ```
 
-Make labels
+Make labels for the plot
 
 ```{r}
 # shared x-axis labels for panel a
@@ -238,7 +157,7 @@ skel_labs <- c("Control" = "Control",
                "Lobophora skeleton" = "<i>Lobophora</i><br>skeleton")
 ```
 
-Panel a (cell means with raw data - keep interaction term in):
+Make panel a (raw data in boxplot form):
 
 ```{r}
 weights_2 %>% 
@@ -267,7 +186,7 @@ weights_2 %>%
   xlab("") -> plt.a
 ```
 
-Panel B: 
+Make panel b, left (snail marginal means)
 
 ```{r}
 marg %>% 
@@ -287,7 +206,7 @@ marg %>%
   xlab("Snail wound") -> plt.b
 ```
 
-Panel C:
+Make panel b, right (structure marginal means)
 
 ```{r}
 marg %>% 
@@ -309,8 +228,7 @@ marg %>%
   xlab("Structure treatment") -> plt.c
 ```
 
-
-Plot together:
+Plot all panels together with raw data and save as a PDF in our `figures` folder
 
 ```{r}
 pdf(here("figures", "fig_2_weights.pdf"), height = 5.5, width = 6)
