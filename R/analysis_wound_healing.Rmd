@@ -215,16 +215,16 @@ coxph.t.3 <- coxph(Surv(tstart, tstop, event = wound_healed) ~ size_mm2 + frailt
 
 ## Model comparisons
 
-Examine importance of size (i.e., dropped it--structure-only treatment):
-
-```{r}
-anova(coxph.t.1, coxph.t.2) # size is important (makes the model worse when we drop it)
-```
-
 Examine importance of structure (i.e., dropped it--size-only treatment):
 
 ```{r}
 anova(coxph.t.1, coxph.t.3) # structure is not detectably important
+```
+
+Examine importance of size (i.e., dropped it--structure-only treatment):
+
+```{r}
+anova(coxph.t.1, coxph.t.2) # wound size is important (makes the model worse when we drop it)
 ```
 
 # Plot healing times
