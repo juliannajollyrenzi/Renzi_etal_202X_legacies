@@ -92,25 +92,25 @@ summary(mW1)
 car::Anova(mW1) # interaction is not important 
 ```
 
-Examine posthoc contrasts
+Examine posthoc contrasts visually (for multifactor structure treatment)
 
 ```{r}
 # plot marginal means for skeleton treatment to see expected ordering
 plot(emmeans(mW1, ~ treatment_skeleton))
 ```
 
-And magnitudes
+Examine magnitudes (report these in the results)
 
 ```{r}
 # examine posthoc contrasts (pairwise is a shortcut for pairs())
-emmeans(mW1, pairwise ~ treatment_skeleton, 
+emmeans(mW1, pairwise ~ treatment_drupella, 
         type = "response") # this is overkill (no link function and Gaussian)
 
-emmeans(mW1, pairwise ~ treatment_drupella, 
+emmeans(mW1, pairwise ~ treatment_skeleton, 
         type = "response") # this is overkill (no link function and Gaussian)
 ```
 
-# Plot model and data
+# Plot results
 
 Get model dataframe for plotting. First, get pairwise `emmeeans` comparisons and compact letter displays from the package `cld`.
 
