@@ -81,7 +81,7 @@ tissue_1 %>%
 Model the probability of complete mortality (i.e., tissue cover = 0% after 9 months)
 
 ```{r}
-m1 <- glmmTMB(total_mortality_yn ~ skeleton_yn + treatment_drupella + (1|parent_colony), 
+m1 <- glmmTMB(total_mortality_yn ~ skeleton_yn + (1|parent_colony), 
               family = binomial,
               data = tissue_2)
 ```
@@ -101,9 +101,9 @@ car::Anova(m1)
 Examine the magnitude
 
 ```{r}
-summary(m1) # coefficient for skeleton is 2.418
+summary(m1) # coefficient for skeleton is 2.336
 
-exp(2.418) # means the odds of “success” (i.e., dying) for a coral in the skeleton treatment is about 11.22 times higher than the odds of dying for a control coral
+exp(2.336) # means the odds of “success” (i.e., dying) for a coral in the skeleton treatment is about 10.34 times higher than the odds of dying for a control coral
 ```
 
 # Plot
@@ -187,7 +187,7 @@ dev.off()
 # Confirm qualitatively the same if we keep all structure treatments in
 
 ```{r}
-m2 <- glmmTMB(total_mortality_yn ~ treatment_skeleton + treatment_drupella + (1|parent_colony), 
+m2 <- glmmTMB(total_mortality_yn ~ treatment_skeleton + (1|parent_colony), 
               family = binomial,
               data = tissue_2)
 ```
@@ -209,7 +209,7 @@ See pattern is the same and the skeleton treatments all appear to behaving simil
 Get marginal effects
 
 ```{r}
-emm_skel  <- emmeans(m2, ~ treatment_skeleton, type = "response") %>%  # marginal means, averaged over snail
+emm_skel <- emmeans(m2, ~ treatment_skeleton, type = "response") %>%  # marginal means, averaged over snail
   as_tibble() %>% 
   mutate(treatment_skeleton = case_when(treatment_skeleton == "control" ~ "Control",
                                         treatment_skeleton == "hali" ~ "<i>Halimeda</i><br>skeleton",
