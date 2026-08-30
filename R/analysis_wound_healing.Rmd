@@ -232,7 +232,7 @@ anova(coxph.t.1, coxph.t.2) # wound size is important (makes the model worse whe
 First, wrangle the dataframe for plotting
 
 ```{r}
-# create axis value/"sentinel" for wounds that never healed
+# create axis value/"sentinel" for wounds that never healed (i.e., where they'll show up on the top part of the broken axis)
 sentinel <- 200
 
 # add this to the dataframe and classify points
@@ -254,13 +254,15 @@ pdf(here("figures", "fig_3_healing.pdf"), height = 4, width = 6.5,
     onefile = FALSE) # remove white starter page
 
 healed_4 %>% 
+  # get these in a matching order
+  mutate(treatment_skeleton = factor(treatment_skeleton, levels = c("control", "skeleton", "hali", "loboph"))) %>% 
   ggplot(aes(x = size_mm2, y = days_numeric,
              color = treatment_skeleton)) +
-  geom_point(size = 2, alpha = 0.7) +
+  geom_point(size = 2, alpha = 0.6) +
   xlab(expression(paste("Wound size (", mm^2, ")"))) +
   ylab("Time to healing (days)") +
   scale_color_manual(name = "Structure treatment",
-                      values = c("#440154", "#3B528B", "#35B779FF", "#FDE725"),
+                      values = c("#FDE725", "#440154", "#35B779FF", "#3B528B"),
                       labels = (c("control" = "Control", "skeleton" = "Skeleton",
                 "hali" = "<i>Halimeda</i> skeleton",
                 "loboph" = "<i>Lobophora</i> skeleton"))
