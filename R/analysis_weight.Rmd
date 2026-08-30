@@ -88,7 +88,6 @@ check_model(mW1)
 Examine outputs and which terms were important
 
 ```{r}
-summary(mW1)
 car::Anova(mW1) # interaction is not important 
 ```
 
@@ -112,12 +111,12 @@ emmeans(mW1, pairwise ~ treatment_skeleton,
 
 # Plot results
 
-Get model dataframe for plotting. First, get pairwise `emmeeans` comparisons and compact letter displays from the package `cld`.
+Get model dataframe for plotting. First, get pairwise `emmeans` comparisons and compact letter displays from the package `cld`.
 
 ```{r}
-emm_skel  <- emmeans(mW1, ~ treatment_skeleton) # marginal means, averaged over snail
+emm_skel  <- emmeans(mW1, ~ treatment_skeleton) # marginal means, averaged over snail treatment
 
-emm_snail <- emmeans(mW1, ~ treatment_drupella)   # marginal means, averaged over 
+emm_snail <- emmeans(mW1, ~ treatment_drupella)   # marginal means, averaged over structure treatment
 ```
 
 Get compact letter displays for structure and snail treatments
@@ -169,7 +168,6 @@ weights_2 %>%
                      values = c(no.snail.col, snail.col)) +
   geom_jitter(aes(x = treatment_skeleton, y = change,
                   color = treatment_drupella),
-              # shape 21 with no fill: outline only, stroke set outside aes()
               size = 2, shape = 21, fill = NA, stroke = 0.5,
               position = position_jitterdodge(jitter.width = 0.15,
                                               jitter.height = 0,
@@ -233,7 +231,7 @@ Plot all panels together with raw data and save as a PDF in our `figures` folder
 ```{r}
 pdf(here("figures", "fig_2_weights.pdf"), height = 5.5, width = 6)
 
-# tags set directly so the two (b) sub-plots share one label
+# set tags directly so the two (b) sub-plots share one label
 plt.a  <- plt.a  + labs(tag = "(a)")
 plt.b <- plt.b + labs(tag = "(b)")
 
