@@ -116,6 +116,6 @@ tissue_2 %>%
                 "Halimeda skeleton" = "<i>Halimeda</i><br>skeleton",
                 "Lobophora skeleton" = "<i>Lobophora</i><br>skeleton")))
 
-dev.off()
+dev.off() 
 ```
 
