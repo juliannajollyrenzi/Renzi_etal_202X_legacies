@@ -82,7 +82,7 @@ tissue_1 %>%
 Model the probability of complete mortality (i.e., tissue cover = 0% after 9 months)
 
 ```{r}
-m1 <- glmmTMB(total_mortality_yn ~ skeleton_yn + (1|parent_colony), 
+m1 <- glmmTMB(total_mortality_yn ~ skeleton_yn + treatment_drupella + (1|parent_colony), 
               family = binomial,
               data = tissue_2)
 ```
@@ -102,10 +102,10 @@ car::Anova(m1)
 Examine the magnitude
 
 ```{r}
-summary(m1) # coefficient for skeleton is 2.336
+summary(m1) # coefficient for skeleton is 2.418
 
 # by hand way
-exp(2.336) # means the odds of “success” (i.e., dying) for a coral in the skeleton treatment is about 10.34 times higher than the odds of dying for a control coral
+exp(2.418) # means the odds of “success” (i.e., dying) for a coral in the skeleton treatment is about 10.34 times higher than the odds of dying for a control coral
 
 # using model properties:
 exp(confint(m1, parm = "beta_", method = "wald"))
@@ -194,7 +194,7 @@ dev.off()
 # Confirm qualitatively the same if we keep all structure treatments in
 
 ```{r}
-m2 <- glmmTMB(total_mortality_yn ~ treatment_skeleton + (1|parent_colony), 
+m2 <- glmmTMB(total_mortality_yn ~ treatment_skeleton + treatment_drupella + (1|parent_colony), 
               family = binomial,
               data = tissue_2)
 ```
