@@ -29,7 +29,8 @@ librarian::shelf(here, # relative file paths
                  performance, # check model assumptions
                  multcomp, # compact letter displays
                  patchwork, # combining plots into one
-                 scales # percent formatting
+                 scales, # percent formatting
+                 ggtext
                  )
 ```
 
@@ -143,7 +144,7 @@ tissue_2 %>%
            aes(group = mortality_binary, fill = mortality_binary)) +
   ylab("Percent of corals") +
   xlab("") +
-  scale_x_discrete(labels = c("No" = "Control", "Yes" = "Skeleton")) +
+  scale_x_discrete(labels = c("No" = "Control", "Yes" = "Combined skeleton")) +
   scale_fill_manual(name = "Status in May", values = c("Alive" = "#e69f00", "Dead" = "#0072b2")) +
   theme_classic() +
   geom_text(data = prop_corals,
@@ -163,15 +164,16 @@ emm_skel  <- as_tibble(emmeans(m1, ~ skeleton_yn, type = "response")) # marginal
 ```{r}
 emm_skel %>% 
   mutate(skeleton_yn = case_when(skeleton_yn == "No" ~ "Control",
-                                 skeleton_yn == "Yes" ~ "Skeleton")) %>% 
+                                 skeleton_yn == "Yes" ~ "Combined skeleton")) %>% 
+  mutate(skeleton_yn = factor(skeleton_yn, levels = c("Control", "Combined skeleton"))) %>% 
   ggplot() +
   geom_pointrange(aes(x = skeleton_yn, y = prob,
                       ymin = asymp.LCL, ymax = asymp.UCL),
                   size = .8, linewidth = .8, color = "black") +
   theme_classic() +
   theme(axis.line = element_blank(),
-        panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
-        axis.text.x = element_markdown(lineheight = 1)) +
+        panel.border = element_rect(color = "black", fill = NA, linewidth = 1), axis.text.x = element_markdown(lineheight = 1)
+        ) +
   ylab("Predicted probability of mortality") +
   xlab("") -> mort.emms.plt
 ```
@@ -184,6 +186,7 @@ pdf(here("figures", "fig_4_mortality.pdf"), height = 3.5 , width = 7)
 mort.may.plt + mort.emms.plt + plot_annotation(tag_levels = 'a',
                                             tag_prefix = '(',
                                             tag_suffix = ')')
+
 
 dev.off()
 ```
@@ -237,7 +240,8 @@ emm_skel %>%
   theme_classic() +
   theme(axis.line = element_blank(),
         panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
-        axis.text.x = element_markdown(lineheight = 1)) +
+        axis.text.x = element_markdown(lineheight = 1)
+        ) +
   ylab("Predicted probability of mortality") +
   xlab("")
 
