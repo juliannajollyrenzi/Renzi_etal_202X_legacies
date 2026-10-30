@@ -40,7 +40,7 @@ All downloaded on Jan 18, 2026 from the MCR website
 
 ```{r}
 # coral timeseries
-corals_1 <- read_csv(here("data", "mcr",
+corals_1 <- read_csv(here("data", "MCR",
                           "knb-lter-mcr.4_2_20260116_coral_wide.csv"),
                      # specify that NA values are coded as "na"
                       na = "na")

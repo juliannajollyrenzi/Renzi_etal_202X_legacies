@@ -68,7 +68,9 @@ weights_1 %>%
                                         treatment_skeleton == "loboph" ~ "Lobophora skeleton",
                                         treatment_skeleton == "skeleton" ~ "Skeleton")) %>% 
   # get into a nice order
-  mutate(treatment_skeleton = factor(treatment_skeleton, levels = c("Control", "Skeleton", "Halimeda skeleton", "Lobophora skeleton"))) -> weights_2
+  mutate(treatment_skeleton = factor(treatment_skeleton, levels = c("Control", "Skeleton", "Halimeda skeleton", "Lobophora skeleton"))) %>% 
+  # filter out corals we need to exclude
+  filter(is.na(exclude_date)) -> weights_2
 ```
 
 # Model weight change
@@ -114,9 +116,12 @@ emmeans(mW1, pairwise ~ treatment_skeleton,
 Get model dataframe for plotting. First, get pairwise `emmeans` comparisons and compact letter displays from the package `cld`.
 
 ```{r}
-emm_skel  <- emmeans(mW1, ~ treatment_skeleton) # marginal means, averaged over snail treatment
+# marginal means, averaged over snail treatment
+emm_skel  <- emmeans(mW1, ~ treatment_skeleton, 
+                     df = df.residual(mW1)) # with package update, need this call 
 
-emm_snail <- emmeans(mW1, ~ treatment_drupella)   # marginal means, averaged over structure treatment
+# marginal means, averaged over structure treatment
+emm_snail <- emmeans(mW1, ~ treatment_drupella, df = df.residual(mW1))
 ```
 
 Get compact letter displays for structure and snail treatments

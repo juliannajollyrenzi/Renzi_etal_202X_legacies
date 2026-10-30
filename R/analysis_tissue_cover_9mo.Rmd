@@ -105,7 +105,7 @@ Examine the magnitude
 summary(m1) # coefficient for skeleton is 2.418
 
 # by hand way
-exp(2.418) # means the odds of “success” (i.e., dying) for a coral in the skeleton treatment is about 10.34 times higher than the odds of dying for a control coral
+exp(2.418) # means the odds of “success” (i.e., dying) for a coral in the skeleton treatment is about 11.22 times higher than the odds of dying for a control coral
 
 # using model properties:
 exp(confint(m1, parm = "beta_", method = "wald"))

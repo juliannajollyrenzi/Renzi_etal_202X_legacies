@@ -26,7 +26,8 @@ librarian::shelf(here, # relative file paths
                  glmmTMB, # model creation
                  car, # type II ANOVA
                  emmeans, # marginal means
-                 performance # check model assumptions
+                 performance, # check model assumptions
+                 ggtext # axes
                  )
 ```
 

@@ -40,18 +40,18 @@ For the first three months of the experiment, all corals were monitored every ~3
 
 ![ Alt text](./images/fig_s1_setup.jpeg)
 
-**Experimental treatments:** Panel (a) shows a control *Pocillopora* coral fragment with no structure nearby. Panel (b) is a coral fragment in a skeleton treatment. Panel (c) is a coral fragment in a skeleton with *Lobophora* treatment. *Lobophora* was attached both to the base of the tube and to a nearby branch to simulate natural overgrowth patterns. Panel (d) is a coral fragment in the skeleton with *Halimeda* treatment. Panel (f) shows an example of a fresh snail wound created at the beginning of the experiment. All treatments (a-d) were fully crossed with snail wounding (n = 15/treatment)
+**Experimental treatments:** Panel (a) shows a control *Pocillopora* coral fragment with no structure nearby. Panel (b) is a coral fragment in a skeleton treatment. Panel (c) is a coral fragment in a skeleton with *Lobophora* treatment. *Lobophora* was attached both to the base of the tube and to a nearby branch to simulate natural overgrowth patterns. Panel (d) is a coral fragment in the skeleton with *Halimeda* treatment. Panel (e) shows an example of a fresh snail wound created at the beginning of the experiment. All treatments (a-d) were fully crossed with snail wounding (n = 15/treatment)
 
 
 ### Recommended Citation
 
 Official citation forthcoming
 
-Julianna J. Renzi, Noam Altman-Kurosaki, Jaden Harding, Thomas C. Adam, Nicolas S. Jeffress, and Deron E. Burkepile (202X). Legacies of despair: how do structural and biological legacies from disturbance interact to influence coral growth and survivorship? *In prep*.
+Julianna J. Renzi, Noam Altman-Kurosaki, Jaden Harding, Thomas C. Adam, Nicolas S. Jeffress, and Deron E. Burkepile. Legacies of despair: how do structural and biological legacies from disturbance interact to influence coral growth and survivorship? Oecologia.
 
 ### Acknowledgements
 
-We thank the community of Moorea for hosting this research on Tahitian land and waters. With respect to the spelling of Moorea, we followed the Raapoto transcription system, but also recognize other community members follow the Te Fare Vanā’a transcription system where the island name is spelled with an ’eta (Mo’orea). Research was completed under permits issued by the Territorial Government of French Polynesia (Délégation à la Recherche) and the Haut-Commissariat de la République en Polynésie Francaise (DTRT), and we thank the Délégation à la Recherche and DTRT for their continued support. Ellie Halewood, Craig Nelson, and Rebecca Vega Thurber provided valuable technical expertise. Adrian Stier, Joan Dudney, Greta Aeby, and Sally Holbrook provided useful feedback on the scientific questions and experimental design. We would like to thank Mark Renzi (ERA), Lauren Enright, Lindsay Cullen, Noe Castañeda, Olivia Isbell, Elliott Cameron, and Rio Kashimoto for assistance in the field as well as the entire University of California Gump Research Station staff, with whom this work would not have been possible.
+We thank the community of Moorea for hosting this research on Tahitian land and waters. With respect to the spelling of Moorea, we followed the Raapoto transcription system, but also recognize other community members follow the Te Fare Vanā’a transcription system where the island name is spelled with an ’eta (Mo’orea). Research was completed under permits issued by the Territorial Government of French Polynesia (Délégation à la Recherche) and the Haut-Commissariat de la République en Polynésie Francaise (DTRT), and we thank the Délégation à la Recherche and DTRT for their continued support. Ellie Halewood, Craig Nelson, and Rebecca Vega Thurber provided valuable technical expertise. Adrian Stier, Joan Dudney, Greta Aeby, and Sally Holbrook provided useful feedback on the scientific questions and experimental design. We would like to thank Mark Renzi (ERA), Lauren Enright, Lindsay Cullen, Noe Castañeda, Olivia Isbell, Elliott Cameron, and Rio Kashimoto for assistance in the field as well as the entire University of California Gump Research Station staff, without whom this work would not have been possible.
 
 ### Funding
 
@@ -133,9 +133,9 @@ Schneider CA, Rasband WS, Eliceiri KW (2012) NIH Image to ImageJ: 25 years of im
 
 ## File: wound_sizes.csv
 
-*Snail would sizes*
+*Snail wound sizes*
 
-**Description:** Snail would sizes on experimental corals. Wounds were measured in ImageJ using reference lengths 
+**Description:** Snail wound sizes on experimental corals. Wounds were measured in ImageJ using reference lengths 
 
 #### Variables
 
@@ -169,7 +169,7 @@ Schneider CA, Rasband WS, Eliceiri KW (2012) NIH Image to ImageJ: 25 years of im
 
 ## File: analysis_tissue_cover_3mo.Rmd
 
-**Description:** Rmd file that analyzes changes in coral tissue cover over 3 months (July-November) and produces **Fig. S3**
+**Description:** Rmd file that analyzes changes in coral tissue cover over 3 months (July-November) and produces **Fig. S4**
 
 ## File: analysis_tissue_cover_9mo.Rmd
 
