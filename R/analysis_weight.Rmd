@@ -105,9 +105,11 @@ Examine magnitudes (report these in the results)
 ```{r}
 # examine posthoc contrasts (pairwise is a shortcut for pairs())
 emmeans(mW1, pairwise ~ treatment_drupella, 
+        df = df.residual(mW1),
         type = "response") # this is overkill (no link function and Gaussian)
 
 emmeans(mW1, pairwise ~ treatment_skeleton, 
+        df = df.residual(mW1),
         type = "response") # this is overkill (no link function and Gaussian)
 ```
 
@@ -121,7 +123,8 @@ emm_skel  <- emmeans(mW1, ~ treatment_skeleton,
                      df = df.residual(mW1)) # with package update, need this call 
 
 # marginal means, averaged over structure treatment
-emm_snail <- emmeans(mW1, ~ treatment_drupella, df = df.residual(mW1))
+emm_snail <- emmeans(mW1, ~ treatment_drupella, 
+                     df = df.residual(mW1))
 ```
 
 Get compact letter displays for structure and snail treatments

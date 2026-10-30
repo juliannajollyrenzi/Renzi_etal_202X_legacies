@@ -27,7 +27,7 @@ Permanent email: julianna.renzi@gmail.com
 
 ## Dataset Overview
 
-This dataset contains the data and code required to replicate analyses in Renzi et al. (in prep). This dataset was collected as part of a 9-month long experiment in Moorea, French Polynesia examining the effects of dead coral skeletons, associated macroalgae (i.e., *Halimeda* and *Lobophora* spp.), and wounding by the corallivorous snail *Drupella* on *Pocillopora* coral fragments. We ran the experiment on a shallow (~2 m) sandflat on the North shore lagoon between July 2023 and May 2024. For the experiment, we exposed 120 *Pocillopora* coral fragments (~8 cm height) to one of two wounding treatments (an initial wound by *Drupella* or not) crossed with four structure treatments:
+This dataset contains the data and code required to replicate analyses in Renzi et al. (Oecologia). This dataset was collected as part of a 9-month long experiment in Moorea, French Polynesia examining the effects of dead coral skeletons, associated macroalgae (i.e., *Halimeda* and *Lobophora* spp.), and wounding by the corallivorous snail *Drupella* on *Pocillopora* coral fragments. We ran the experiment on a shallow (~2 m) sandflat on the North shore lagoon between July 2023 and May 2024. For the experiment, we exposed 120 *Pocillopora* coral fragments (~8 cm height) to one of two wounding treatments (an initial wound by *Drupella* or not) crossed with four structure treatments:
 
 | Skeleton treatment        | Description           | Number of coral colonies  |
 | ------------- |:-------------:| -----:|
