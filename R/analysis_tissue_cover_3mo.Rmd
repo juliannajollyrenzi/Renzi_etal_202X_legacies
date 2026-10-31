@@ -92,7 +92,7 @@ check_model(m1) # looks OK
 # Plot
 
 ```{r}
-pdf(here("figures", "fig_S4_tissue.pdf"), height = 3, width = 4.5)
+cairo_pdf(here("figures", "fig_S4_tissue.pdf"), height = 3, width = 4.5)
 
 tissue_2 %>% 
   ggplot(aes(x = treatment_skeleton, y = tissue_loss_percent, fill = treatment_drupella)) +

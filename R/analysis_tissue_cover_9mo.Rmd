@@ -139,11 +139,9 @@ tissue_2 %>%
                                       total_mortality_yn == 1 ~ "Dead",
                                       TRUE ~ "ERROR")) %>% 
   ggplot(aes(x = skeleton_yn)) +
-  scale_y_continuous(labels = percent) +
   geom_bar(stat = "count", position = "fill",
            aes(group = mortality_binary, fill = mortality_binary)) +
-  scale_y_continuous(labels = function(x) x * 100) +
-  ylab("Fraction of corals (%)") +
+  ylab("Fraction of corals") +
   xlab("") +
   scale_x_discrete(labels = c("No" = "Control", "Yes" = "Combined skeleton")) +
   scale_fill_manual(name = "Status in May", values = c("Alive" = "#e69f00", "Dead" = "#0072b2")) +
