@@ -213,7 +213,7 @@ color_labels <- c("All coral" = "#440154", Halimeda = "#8cc751", "Lobophora" = "
 ```
 
 ```{r}
-pdf(here("figures", "fig_1a_mcr.pdf"), height = 3, width = 5.5)
+cairo_pdf(here("figures", "fig_1a_mcr.pdf"), height = 62 / 25.4, width = 110 / 25.4)
 
 coral_and_algae_2 %>% 
   filter(Year > 2013) %>% 
@@ -245,14 +245,16 @@ coral_and_algae_2 %>%
   # make specific categories more transparent and coral/macroalgae bold
   scale_alpha_manual(values = c("All coral" = 1.0, "All macroalgae" = 1.0, "Halimeda" = 0.5, "Lobophora" = 0.5, "Pocillopora" = 0.5),
                      labels = italic_labels) +
-    xlab("") +
+    xlab("Year") +
     ylab("Cover (%)") +
+  # label every other year so the labels fit horizontally
+  scale_x_discrete(breaks = as.character(seq(2015, 2025, by = 2))) +
   # 2019 MHW
   geom_vline(xintercept = "2019", color = "firebrick", alpha = 0.5,
              lwd = 1.5) +
-  theme_classic() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        panel.border = element_rect(color = "black", fill = NA, linewidth = 1))
+  theme_classic(base_size = 10) +
+  theme(axis.line = element_blank(),
+        panel.border = element_rect(color = "black", fill = NA, linewidth = 0.5))
 
 dev.off()
 ```

@@ -183,8 +183,9 @@ weights_2 %>%
   scale_color_manual(name = "Snail wound", labels = c("n" = "No", "y" = "Yes"),
                      values = c(no.snail.col.dark, snail.col.dark)) +
   scale_x_discrete(labels = skel_labs) +
-  theme_classic() +
-  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+  theme_classic(base_size = 10) +
+  theme(axis.line = element_blank(),
+        panel.border = element_rect(color = "black", fill = NA, linewidth = 0.5),
         strip.background = element_blank(),
         legend.position = "top",
         axis.text.x = element_markdown(lineheight = 1)) +
@@ -198,16 +199,18 @@ Make panel b, left (snail marginal means)
 marg %>% 
   filter(factor == "Snail wound") %>% 
   ggplot() +
-  geom_pointrange(aes(x = level_label, y = emmean,
-                      ymin = lower.CL, ymax = upper.CL),
-                  size = .8, linewidth = .8, color = "black") +
+  geom_errorbar(aes(x = level_label, ymin = lower.CL, ymax = upper.CL),
+                width = 0.15, linewidth = 0.5, color = "black") +
+  geom_point(aes(x = level_label, y = emmean), size = 2.5, color = "black") +
   geom_text(aes(x = level_label, y = upper.CL, label = group),
-            vjust = -0.8, size = 4, color = "black") +
+            vjust = -0.8, size = 3.5, color = "black") +
   scale_y_continuous(expand = expansion(mult = c(0.05, 0.20))) +
-  theme_classic() +
+  theme_classic(base_size = 10) +
   theme(axis.line = element_blank(),
-        panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+        panel.border = element_rect(color = "black", fill = NA, linewidth = 0.5),
         axis.text.x = element_markdown(lineheight = 1)) +
+  scale_y_continuous(limits = range(marg$lower.CL, marg$upper.CL),
+                     expand = expansion(mult = c(0.05, 0.21))) +
   ylab("Weight change (g)") +
   xlab("Snail wound") -> plt.b
 ```
@@ -218,30 +221,33 @@ Make panel b, right (structure marginal means)
 marg %>% 
   filter(factor == "Structure treatment") %>% 
   ggplot() +
-  geom_pointrange(aes(x = level_label, y = emmean,
-                      ymin = lower.CL, ymax = upper.CL),
-                  size = .8, linewidth = .8, color = "black") +
+  geom_errorbar(aes(x = level_label, ymin = lower.CL, ymax = upper.CL),
+                width = 0.15, linewidth = 0.5, color = "black") +
+  geom_point(aes(x = level_label, y = emmean), size = 2.5, color = "black") +
   geom_text(aes(x = level_label, y = upper.CL, label = group),
-            vjust = -0.8, size = 4, color = "black") +
+            vjust = -0.8, size = 3.5, color = "black") +
   scale_y_continuous(expand = expansion(mult = c(0.05, 0.20))) +
-  theme_classic() +
+  theme_classic(base_size = 10) +
   theme(axis.line = element_blank(),
-        panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+        panel.border = element_rect(color = "black", fill = NA, linewidth = 0.5),
         axis.text.x = element_markdown(lineheight = 1),
         # drop the duplicated y-axis on the right-hand plot
         axis.title.y = element_blank()) +
   ylab(NULL) +
+  scale_y_continuous(limits = range(marg$lower.CL, marg$upper.CL),
+                     expand = expansion(mult = c(0.05, 0.21))) +
   xlab("Structure treatment") -> plt.c
 ```
 
 Plot all panels together with raw data and save as a PDF in our `figures` folder
 
 ```{r}
-pdf(here("figures", "fig_2_weights.pdf"), height = 5.5, width = 6)
+cairo_pdf(here("figures", "fig_2_weights.pdf"), height = 120 / 25.4, width = 129 / 25.4)
 
 # set tags directly so the two (b) sub-plots share one label
-plt.a  <- plt.a  + labs(tag = "(a)")
+plt.a <- plt.a + labs(tag = "(a)")
 plt.b <- plt.b + labs(tag = "(b)")
+plt.c <- plt.c + labs(tag = "(c)")
 
 
 plt.a / (plt.b + plt.c + plot_layout(widths = c(2, 4))) +
