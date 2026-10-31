@@ -251,23 +251,28 @@ healing_2 %>%
 Plot
 
 ```{r}
-pdf(here("figures", "fig_3_healing.pdf"), height = 4, width = 6.5, 
+cairo_pdf(here("figures", "fig_3_healing.pdf"), height = 85 / 25.4, width = 129 / 25.4, 
     onefile = FALSE) # remove white starter page
 
 healed_4 %>% 
   # get these in a matching order
   mutate(treatment_skeleton = factor(treatment_skeleton, levels = c("control", "skeleton", "hali", "loboph"))) %>% 
   ggplot(aes(x = size_mm2, y = days_numeric,
-             color = treatment_skeleton)) +
-  geom_point(size = 2, alpha = 0.6) +
+             color = treatment_skeleton, shape = treatment_skeleton)) +
+  geom_point(size = 2, alpha = 0.8) +
   xlab(expression(paste("Wound size (", mm^2, ")"))) +
-  ylab("Time to healing (days)") +
+  ylab("Time to healing (d)") +
   scale_color_manual(name = "Structure treatment",
-                      values = c("#FDE725", "#440154", "#35B779FF", "#3B528B"),
+                      values = c("#D4A800", "#440154", "#35B779FF", "#3B528B"),
                       labels = (c("control" = "Control", "skeleton" = "Skeleton",
                 "hali" = "<i>Halimeda</i> skeleton",
                 "loboph" = "<i>Lobophora</i> skeleton"))
                       ) +
+  scale_shape_manual(name = "Structure treatment",
+                     values = c("control" = 16, "skeleton" = 17, "hali" = 15, "loboph" = 18),
+                     labels = c("control" = "Control", "skeleton" = "Skeleton",
+                                "hali" = "<i>Halimeda</i> skeleton",
+                                "loboph" = "<i>Lobophora</i> skeleton")) +
   # create y-axis break between real data max and the sentinel/unhealed values
   scale_y_break(breaks = c(100, 194), space = 0.2) +
   # replace the sentinel tick with text
@@ -279,16 +284,17 @@ healed_4 %>%
   scale_x_continuous(
     breaks = c(0, 50, 100, 150, 200, 250, 300)
   ) +
-  theme_classic() +
+  theme_classic(base_size = 10) +
   # get rid of ggbreaks second y-axis
-  theme(axis.text.y.right  = element_blank(),
-  axis.ticks.y.right = element_blank(),
-  axis.line.y.right  = element_blank(),
-  # move axes a little closer
-  axis.title.y = element_text(margin = margin(t = 0, r = -14)),
-  # and move x-axis label to be more centered on the actual plot
-  axis.title.x = element_text(margin = margin(t = -4, r = 0), hjust = 0.37),
-  panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+  theme(axis.line = element_blank(),
+        axis.text.y.right  = element_blank(),
+        axis.ticks.y.right = element_blank(),
+        axis.line.y.right  = element_blank(),
+        # move axes a little closer
+        axis.title.y = element_text(margin = margin(t = 0, r = -14)),
+        # and move x-axis label to be more centered on the actual plot
+        axis.title.x = element_text(margin = margin(t = -4, r = 0), hjust = 0.37),
+        panel.border = element_rect(color = "black", fill = NA, linewidth = 0.5),
         legend.position = "right", legend.text = element_markdown()) 
 
 dev.off()

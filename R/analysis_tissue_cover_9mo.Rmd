@@ -142,16 +142,18 @@ tissue_2 %>%
   scale_y_continuous(labels = percent) +
   geom_bar(stat = "count", position = "fill",
            aes(group = mortality_binary, fill = mortality_binary)) +
-  ylab("Percent of corals") +
+  scale_y_continuous(labels = function(x) x * 100) +
+  ylab("Fraction of corals (%)") +
   xlab("") +
   scale_x_discrete(labels = c("No" = "Control", "Yes" = "Combined skeleton")) +
   scale_fill_manual(name = "Status in May", values = c("Alive" = "#e69f00", "Dead" = "#0072b2")) +
-  theme_classic() +
+  theme_classic(base_size = 10) +
   geom_text(data = prop_corals,
     aes(x = skeleton_yn, y = Dead/(Dead+Alive), label = proportion_corals),
     vjust = -0.5, color = "#0072b2"
   ) +
-  theme(panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
+  theme(axis.line = element_blank(),
+        panel.border = element_rect(color = "black", fill = NA, linewidth = 0.5),
         legend.position = "top") -> mort.may.plt
 ```
 
@@ -167,21 +169,21 @@ emm_skel %>%
                                  skeleton_yn == "Yes" ~ "Combined skeleton")) %>% 
   mutate(skeleton_yn = factor(skeleton_yn, levels = c("Control", "Combined skeleton"))) %>% 
   ggplot() +
-  geom_pointrange(aes(x = skeleton_yn, y = prob,
-                      ymin = asymp.LCL, ymax = asymp.UCL),
-                  size = .8, linewidth = .8, color = "black") +
-  theme_classic() +
+  geom_errorbar(aes(x = skeleton_yn, ymin = asymp.LCL, ymax = asymp.UCL),
+                width = 0.15, linewidth = 0.5, color = "black") +
+  geom_point(aes(x = skeleton_yn, y = prob), size = 2.5, color = "black") +
+  theme_classic(base_size = 10) +
   theme(axis.line = element_blank(),
-        panel.border = element_rect(color = "black", fill = NA, linewidth = 1), axis.text.x = element_markdown(lineheight = 1)
+        panel.border = element_rect(color = "black", fill = NA, linewidth = 0.5), axis.text.x = element_markdown(lineheight = 1)
         ) +
-  ylab("Predicted probability of mortality") +
+  ylab("Probability of mortality") +
   xlab("") -> mort.emms.plt
 ```
 
 ## Plot together
 
 ```{r}
-pdf(here("figures", "fig_4_mortality.pdf"), height = 3.5 , width = 7)
+cairo_pdf(here("figures", "fig_4_mortality.pdf"), height = 70 / 25.4, width = 129 / 25.4)
 
 mort.may.plt + mort.emms.plt + plot_annotation(tag_levels = 'a',
                                             tag_prefix = '(',
@@ -230,13 +232,13 @@ emm_skel <- emmeans(m2, ~ treatment_skeleton, type = "response") %>%  # marginal
 Plot
 
 ```{r}
-pdf(here("figures", "fig_S5_mortality_structure.pdf"), height = 3, width = 4)
+cairo_pdf(here("figures", "fig_S5_mortality_structure.pdf"), height = 3, width = 4)
 
 emm_skel %>% 
   ggplot() +
-  geom_pointrange(aes(x = treatment_skeleton, y = prob,
-                      ymin = asymp.LCL, ymax = asymp.UCL),
-                  size = .8, linewidth = .8, color = "black") +
+  geom_errorbar(aes(x = treatment_skeleton, ymin = asymp.LCL, ymax = asymp.UCL),
+                width = 0.15, linewidth = 0.5, color = "black") +
+  geom_point(aes(x = treatment_skeleton, y = prob), size = 2.5, color = "black") +
   theme_classic() +
   theme(axis.line = element_blank(),
         panel.border = element_rect(color = "black", fill = NA, linewidth = 1),
