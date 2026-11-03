@@ -67,7 +67,7 @@ Schneider CA, Rasband WS, Eliceiri KW (2012) NIH Image to ImageJ: 25 years of im
 
 # Data files
 
-- Note that due to storage limitations on GitHub, the timeseries data from the Moorea Coral Reef LTER are not included here, but they can be downloaded freely here: https://mcr.lternet.edu/data
+- Note that due to storage limitations on GitHub, the timeseries data from the Moorea Coral Reef LTER are not included here, but they can be downloaded freely here: https://mcr.lternet.edu/data. Save the coral time series (`knb-lter-mcr.4_2_20260116_coral_wide.csv`) and the benthic cover survey (`MCR_LTER_Annual_Survey_Benthic_Cover_20251009.csv`) in `data/MCR/` to run `timeseries_mcr.Rmd`
 - All dates are reported as YYYY-MM-DD
 
 ## File: metadata.csv
