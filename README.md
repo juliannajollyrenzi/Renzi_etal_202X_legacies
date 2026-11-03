@@ -8,7 +8,7 @@ Data and analysis for Renzi et al. (*Legacies of despair: how do structural and 
 
 ## Permanent data availability
 
-Upon acceptance, all data will be permanently available on EDI and all code will be published on Zenodo. We will then update associated links here.
+All data are permanently available on EDI and all code is published on Zenodo. See publication for DOI's.
 
 ## Description of the data and file structure
 
@@ -45,13 +45,11 @@ For the first three months of the experiment, all corals were monitored every ~3
 
 ### Recommended Citation
 
-Official citation forthcoming
-
 Julianna J. Renzi, Noam Altman-Kurosaki, Jaden Harding, Thomas C. Adam, Nicolas S. Jeffress, and Deron E. Burkepile. Legacies of despair: how do structural and biological legacies from disturbance interact to influence coral growth and survivorship? Oecologia.
 
 ### Acknowledgements
 
-We thank the community of Moorea for hosting this research on Tahitian land and waters. With respect to the spelling of Moorea, we followed the Raapoto transcription system, but also recognize other community members follow the Te Fare Vanā’a transcription system where the island name is spelled with an ’eta (Mo’orea). Research was completed under permits issued by the Territorial Government of French Polynesia (Délégation à la Recherche) and the Haut-Commissariat de la République en Polynésie Francaise (DTRT), and we thank the Délégation à la Recherche and DTRT for their continued support. Ellie Halewood, Craig Nelson, and Rebecca Vega Thurber provided valuable technical expertise. Adrian Stier, Joan Dudney, Greta Aeby, and Sally Holbrook provided useful feedback on the scientific questions and experimental design. We would like to thank Mark Renzi (ERA), Lauren Enright, Lindsay Cullen, Noe Castañeda, Olivia Isbell, Elliott Cameron, and Rio Kashimoto for assistance in the field as well as the entire University of California Gump Research Station staff, without whom this work would not have been possible.
+We thank the community of Moorea for hosting this research on Tahitian land and waters. With respect to the spelling of Moorea, we followed the Raapoto transcription system, but also recognize other community members follow the Te Fare Vanā’a transcription system where the island name is spelled with an ’eta (Mo’orea). Research was completed under permits issued by the Territorial Government of French Polynesia (Délégation à la Recherche) and the Haut-Commissariat de la République en Polynésie Française (DTRT), and we thank the Délégation à la Recherche and DTRT for their continued support. Ellie Halewood, Craig Nelson, and Rebecca Vega Thurber provided valuable technical expertise. Adrian Stier, Joan Dudney, Greta Aeby, and Sally Holbrook provided useful feedback on the scientific questions and experimental design. We would like to thank Mark Renzi (ERA), Lauren Enright, Lindsay Cullen, Noe Castañeda, Olivia Isbell, Elliott Cameron, and Rio Kashimoto for assistance in the field as well as the entire University of California Gump Research Station staff, without whom this work would not have been possible.
 
 ### Funding
 
