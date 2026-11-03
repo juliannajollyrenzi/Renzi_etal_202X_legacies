@@ -55,3 +55,6 @@ MCR_LTER_Annual_Survey_Benthic_Cover_20251009.csv
 
 # PDF images
 *.pdf
+
+# macOS files
+.DS_Store
