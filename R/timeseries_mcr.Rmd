@@ -46,7 +46,7 @@ corals_1 <- read_csv(here("data", "MCR",
                       na = "na")
   
 # algal timeseries
-algae_1 <- read_csv(here("data", "mcr",
+algae_1 <- read_csv(here("data", "MCR",
                          "MCR_LTER_Annual_Survey_Benthic_Cover_20251009.csv"))
 ```
 
