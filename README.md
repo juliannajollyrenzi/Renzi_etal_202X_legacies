@@ -1,5 +1,5 @@
-# Renzi_etal_202X_legacies
-Data and analysis for Renzi et al. 202X (*Legacies of despair: how do structural and biological legacies from disturbance interact to influence coral growth and survivorship?*), which we are currently submitting for peer review.
+# Renzi et al. interaction legacies
+Data and analysis for Renzi et al. (*Legacies of despair: how do structural and biological legacies from disturbance interact to influence coral growth and survivorship?*; Oecologia).
 
 - `data` folder contains original data from the experiment (see Data files section below for more information)
 - `figures` folder stores figure outputs from code in PDF format (gitignore is set to ignore these files, but the files in `R` will output figures here if the code is run)
