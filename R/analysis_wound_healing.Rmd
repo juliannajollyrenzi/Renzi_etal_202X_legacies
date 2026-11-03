@@ -85,8 +85,6 @@ healing_1 %>%
 
 # Make Cox model
 
-## With interaction
-
 Make survival object
 
 ```{r}
@@ -218,7 +216,7 @@ coxph.t.2 <- coxph(Surv(tstart, tstop, event = wound_healed) ~ size_mm2 + tt(siz
 Examine importance of structure (i.e., dropped it--size-only treatment):
 
 ```{r}
-anova(coxph.t.1, coxph.t.2) # structure is not detectably important
+anova(coxph.t.1, coxph.t.2) # structure is not delectably important
 ```
 
 Examine importance of size (note - this has to be a Wald test vs. the way we were doing before because dropping size changes the degrees of freedom):
